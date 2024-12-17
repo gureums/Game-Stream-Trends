@@ -1,0 +1,40 @@
+name: Validate Issue Fields
+
+on:
+  issues:
+    types: [opened, edited, assigned]  # 이슈를 열거나 편집할 때마다 실행
+
+jobs:
+  validate-fields:
+    runs-on: ubuntu-latest  # 이 워크플로우는 우분투 환경에서 실행
+
+    steps:
+      - name: Check Assignee
+        if: ${{ github.event.issue.assignee == null }}
+        run: |
+          echo "Error: Assignee is required."
+          exit 1
+
+      - name: Check Projects Status
+        if: ${{ !contains(github.event.issue.body, 'Status:') }}
+        run: |
+          echo "Error: 'Status' field is required (e.g. Todo, In Progress, Done)."
+          exit 1
+
+      - name: Check Projects Priority
+        if: ${{ !contains(github.event.issue.body, 'Priority:') }}
+        run: |
+          echo "Error: 'Priority' field is required (e.g. P0, P1, P2)."
+          exit 1
+
+      - name: Check Start Date
+        if: ${{ !contains(github.event.issue.body, 'Start date:') }}
+        run: |
+          echo "Error: 'Start date' field is required."
+          exit 1
+
+      - name: Check End Date
+        if: ${{ !contains(github.event.issue.body, 'End date:') }}
+        run: |
+          echo "Error: 'End date' field is required."
+          exit 1

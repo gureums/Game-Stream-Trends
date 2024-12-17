@@ -1,0 +1,18 @@
+name: Add Issue to GitHub Project
+
+on:
+  issues:
+    types: [opened, edited, assigned]  # 이슈가 생성, 편집, 할당될 때마다 실행
+
+jobs:
+  add_to_project:
+    runs-on: ubuntu-latest  # 이 워크플로는 우분투에서 실행
+
+    steps:
+      - name: Add Issue to Project
+        uses: peter-evans/create-or-update-project-card@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # 기본 GITHUB_TOKEN 사용
+          project-location: 'gureums/Game-Stream-Trends'  # 프로젝트의 위치 (예: 'org-name/repo-name')
+          project-number: 2  # 프로젝트 번호
+          issue-number: ${{ github.event.issue.number }}  # 생성된 이슈 번호
