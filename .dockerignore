@@ -19,7 +19,5 @@ __pycache__/
 .idea/
 
 # Docker 관련
-docker-compose.yml
-docker-compose.override.yml
-
-# 자유롭게 추가
+# docker-compose.yml
+# docker-compose.override.yml
