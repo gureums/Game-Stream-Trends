@@ -7,13 +7,16 @@ from datetime import datetime
 
 # 데이터를 저장할 디렉토리 설정 및 생성
 RAW_DATA_DIR = "data/raw/steam"
+
 NEWS_DIR = os.path.join(RAW_DATA_DIR, "news")
 PLAYERS_DIR = os.path.join(RAW_DATA_DIR, "players")
 DETAILS_DIR = os.path.join(RAW_DATA_DIR, "details")
+REVIEW_DIR = os.path.join(RAW_DATA_DIR, "reviewmeta")
 
 os.makedirs(NEWS_DIR, exist_ok=True)
 os.makedirs(PLAYERS_DIR, exist_ok=True)
 os.makedirs(DETAILS_DIR, exist_ok=True)
+os.makedirs(REVIEW_DIR, exist_ok=True)
 
 # 로그 디렉토리 설정 및 생성
 log_dir = os.path.join("logs", "steam")
@@ -102,6 +105,28 @@ def fetch_app_details(appid):
         return False
 
 
+# 특정 앱의 리뷰 관련 메타데이터 수집
+def fetch_app_reviewmeta(appid):
+    # 리뷰 관련 데이터 가져오기 위한 URL
+    url = f"https://store.steampowered.com/appreviews/{appid}?json=1&language=all&review_type=all&purchase_type=all&playtime_filter_min=0&playtime_filter_max=0&playtime_type=all&filter_offtopic_activity=1"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # 요청이 실패하면 예외 발생
+        data = response.json()  # JSON 데이터 그대로 파싱
+
+        # JSON 데이터를 그대로 저장
+        with open(os.path.join(REVIEW_DIR, f"app_{appid}_reviewmeta.json"), "w") as f:
+            json.dump(data, f, indent=4)  # 원시 JSON 데이터를 파일에 저장
+
+        logging.info(f"Review data for appid {appid} saved successfully.")
+        return True  # 성공적으로 저장된 경우 True 반환
+
+    except Exception as e:
+        logging.error(f"Failed to fetch review data for appid {appid}: {e}")
+        return False  # 예외가 발생한 경우 False 반환
+
+
 def main():
     # 전체 앱 목록 가져오기
     app_list = fetch_app_list()
@@ -123,6 +148,9 @@ def main():
             time.sleep(1)
 
             fetch_app_players(appid)
+            time.sleep(1)
+
+            fetch_app_reviewmeta(appid)
             time.sleep(1)
 
             collected_games += 1
