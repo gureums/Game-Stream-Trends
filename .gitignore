@@ -4,6 +4,8 @@ airflow_login.py
 dbinit.py
 initdb.py
 secrets.py
+config/
+plugins/
 
 # Airflow sqlite databases
 airflow.db
@@ -257,4 +259,3 @@ airflow-build-dockerfile*
 
 # Temporary ignore uv.lock until we integrate it fully in our constraint preparation mechanism
 /uv.lock
-
