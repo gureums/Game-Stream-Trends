@@ -1,17 +1,17 @@
 # Use the official Airflow image as the base
 FROM apache/airflow:2.9.1
 
-# Set environment variables
-ENV AIRFLOW__CORE__EXECUTOR=CeleryExecutor \
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow \
-    AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow \
-    AIRFLOW__CELERY__BROKER_URL=redis://:@redis:6379/0 \
-    AIRFLOW__CORE__FERNET_KEY='' \
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION='true' \
-    AIRFLOW__CORE__LOAD_EXAMPLES='true' \
-    AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session' \
-    AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK='true' \
-    _PIP_ADDITIONAL_REQUIREMENTS=pandas
+# Set environment variables (you can customize these)
+ENV AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+ENV AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+ENV AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
+ENV AIRFLOW__CELERY__BROKER_URL=redis://:@redis:6379/0
+ENV AIRFLOW__CORE__FERNET_KEY=''
+ENV AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION='true'
+ENV AIRFLOW__CORE__LOAD_EXAMPLES='true'
+ENV AIRFLOW__API__AUTH_BACKENDS='airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+ENV AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK='true'
+ENV _PIP_ADDITIONAL_REQUIREMENTS=${_PIP_ADDITIONAL_REQUIREMENTS:-pandas}
 
 # Install any additional dependencies if required
 # RUN pip install pandas
@@ -32,10 +32,7 @@ ENV AIRFLOW__CORE__EXECUTOR=CeleryExecutor \
 # airflow 유저로 복귀
 USER airflow
 
-# Copy requirements.txt to the container
 COPY docker-settings/requirements.txt /opt/airflow/docker-settings/requirements.txt
-
-# Install Python dependencies from requirements.txt
 RUN pip install -r docker-settings/requirements.txt
 
 # Expose the port for health check if needed
@@ -43,9 +40,3 @@ EXPOSE 8974
 
 # Optionally add your healthcheck command (this will be part of the docker-compose config)
 HEALTHCHECK CMD curl --fail http://localhost:8974/health || exit 1
-
-# Default entrypoint for Airflow
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-
-# Command for starting Airflow Webserver (can be overridden by docker-compose)
-CMD ["webserver"]
