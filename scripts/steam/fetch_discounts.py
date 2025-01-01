@@ -2,9 +2,12 @@
 ## 다른 나라 통화로도 수정 가능
 
 import logging
+import pytz
 import requests
 from datetime import datetime
 from steam_fetch_config import Config
+
+KST = pytz.timezone('Asia/Seoul')
 
 DATA_TYPE = "discounts"
 Config.setup_s3_logging(bucket_name=Config.S3_BUCKET_NAME, data_type=DATA_TYPE)
@@ -37,7 +40,7 @@ def main():
             combined_discounts = get_discount_data(chunk)
 
             if combined_discounts:
-                date_str = datetime.now().strftime('%Y-%m-%d')
+                date_str = datetime.now(KST).strftime('%Y-%m-%d')
                 chunk_key = f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}_{idx}.json'
                 Config.upload_to_s3(combined_discounts, chunk_key)
                 logging.info(f"Discount data for chunk {idx} uploaded to S3: {chunk_key}")

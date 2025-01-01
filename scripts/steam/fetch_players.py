@@ -1,8 +1,11 @@
+import pytz
 import logging
-from datetime import datetime
 import asyncio
 import aiohttp
 from steam_fetch_config import Config
+from datetime import datetime
+
+KST = pytz.timezone('Asia/Seoul')
 
 DATA_TYPE = "players"
 Config.setup_s3_logging(bucket_name=Config.S3_BUCKET_NAME, data_type=DATA_TYPE)
@@ -35,8 +38,8 @@ def main():
         combined_players = asyncio.run(fetch_all_players(appids))
 
         if combined_players:
-            date_str = datetime.now().strftime('%Y-%m-%d')
-            hour_str = datetime.now().strftime('%H')
+            date_str = datetime.now(KST).strftime('%Y-%m-%d')
+            hour_str = datetime.now(KST).strftime('%H')
             Config.upload_to_s3(combined_players, f'data/raw/steam/{DATA_TYPE}/{date_str}/{hour_str}/combined_{DATA_TYPE}.json')
             logging.info("Combined players data uploaded successfully.")
         else:

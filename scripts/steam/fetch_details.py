@@ -1,8 +1,11 @@
 import time
 import logging
 import requests
+import pytz
 from datetime import datetime
 from steam_fetch_config import Config
+
+KST = pytz.timezone('Asia/Seoul')
 
 DATA_TYPE = "details"
 Config.setup_s3_logging(bucket_name=Config.S3_BUCKET_NAME, data_type=DATA_TYPE)
@@ -41,8 +44,7 @@ def main():
         combined_details = collect_all_details(appids)
 
         if combined_details:
-            # S3에 업로드
-            date_str = datetime.now().strftime('%Y-%m-%d')
+            date_str = datetime.now(KST).strftime('%Y-%m-%d')
             filename = f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}.json'
             Config.upload_to_s3(combined_details, filename)
             logging.info("Combined details data uploaded successfully.")

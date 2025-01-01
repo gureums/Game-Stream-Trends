@@ -1,8 +1,11 @@
 import logging
-from datetime import datetime
 import asyncio
 import aiohttp
+import pytz
 from steam_fetch_config import Config
+from datetime import datetime
+
+KST = pytz.timezone('Asia/Seoul')
 
 DATA_TYPE = "review_metas"
 Config.setup_s3_logging(bucket_name=Config.S3_BUCKET_NAME, data_type=DATA_TYPE)
@@ -35,7 +38,7 @@ def main():
         combined_review_metas = asyncio.run(fetch_all_review_metas(appids))
 
         if combined_review_metas:
-            date_str = datetime.now().strftime('%Y-%m-%d')
+            date_str = datetime.now(KST).strftime('%Y-%m-%d')
             Config.upload_to_s3(combined_review_metas, f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}.json')
             logging.info("Combined review_metas data uploaded successfully.")
         else:

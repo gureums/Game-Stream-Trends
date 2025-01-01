@@ -1,10 +1,13 @@
 import requests
 import logging
+import pytz
 from datetime import datetime
 from twitch_fetch_config import Config
 
 CLIENT_ID = Config.TWC_CLIENT_ID
 ACCESS_TOKEN = Config.TWC_ACCESS_TOKEN
+
+KST = pytz.timezone('Asia/Seoul')
 
 DATA_TYPE = 'streams'
 Config.setup_s3_logging(bucket_name=Config.S3_BUCKET_NAME, data_type=DATA_TYPE)
@@ -17,8 +20,8 @@ def create_headers():
 
 
 def save_data_to_s3(data, page_num):
-    date_str = datetime.now().strftime('%Y-%m-%d')
-    hour_str = datetime.now().strftime('%H')
+    date_str = datetime.now(KST).strftime('%Y-%m-%d')
+    hour_str = datetime.now(KST).strftime('%H')
     file_name = f"data/raw/twitch/{DATA_TYPE}/{date_str}/{hour_str}/fetch_{DATA_TYPE}_{page_num}.json"
     Config.upload_to_s3(data, file_name)
     logging.info(f"Streams data for page {page_num} uploaded to S3 with key: {file_name}")

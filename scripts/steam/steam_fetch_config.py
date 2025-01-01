@@ -3,9 +3,11 @@ import json
 import boto3
 import io
 import logging
+import pytz
 from dotenv import load_dotenv
 from datetime import datetime
 
+KST = pytz.timezone('Asia/Seoul')
 load_dotenv()
 
 class Config:
@@ -69,7 +71,7 @@ class Config:
             self.log_buffer.seek(0)
 
             try:
-                timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+                timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
                 s3_key = f"logs/steam/{self.data_type}/{self.date_str}/fetch_{self.data_type}_{timestamp}.log"
                 s3_client = Config.get_s3_client()
                 s3_client.put_object(
@@ -86,7 +88,7 @@ class Config:
 
     @staticmethod
     def setup_s3_logging(bucket_name, data_type, buffer_size=1000, log_level=logging.INFO):
-        date_str = datetime.now().strftime('%Y-%m-%d')
+        date_str = datetime.now(KST).strftime('%Y-%m-%d')
         log_handler = Config.S3LogHandler(bucket_name, date_str, data_type, buffer_size=buffer_size)
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         log_handler.setFormatter(formatter)
