@@ -14,10 +14,13 @@ task_info = [
 ]
 
 default_args = {
-    'owner': 'airflow',
+    'owner': 'ChoiBeomJun',
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'start_date': datetime(2024, 12, 20, 15, 0),  # UTC 15시 = KST 00시
+    'depends_on_past': False,
+    'email_on_failure': True,
+    'email': ['cbbsjj0314@gmail.com'],
 }
 
 dag = DAG(
@@ -28,6 +31,7 @@ dag = DAG(
     catchup=False,
     concurrency=4,
     max_active_runs=4,
+    tags=['steam', 'bronze', '4-hourly'],
 )
 
 for task_id, python_callable in task_info:
