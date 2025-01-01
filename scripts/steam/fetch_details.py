@@ -29,7 +29,7 @@ def collect_all_details(appids, delay=3):
     for appid in appids:
         appid, data = fetch_app_details(appid)
         if data:
-            details[appid] = data
+            details[appid] = data.get(str(appid), {})
         time.sleep(delay)
 
     return details
@@ -47,6 +47,8 @@ def main():
             date_str = datetime.now(KST).strftime('%Y-%m-%d')
             filename = f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}.json'
             Config.upload_to_s3(combined_details, filename)
+            # filename = f'data/raw/steam/{DATA_TYPE}/{date_str}/test_{DATA_TYPE}.json'
+            # Config.upload_to_s3(combined_details, filename)
             logging.info("Combined details data uploaded successfully.")
         else:
             logging.error("No details data collected to upload.")
