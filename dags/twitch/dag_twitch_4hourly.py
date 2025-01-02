@@ -16,7 +16,7 @@ task_info = [
 ]
 
 default_args = {
-    'owner': 'ChoiBeomJun',
+    'owner': 'BEOMJUN',
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'start_date': datetime(2024, 12, 20, 15, 0),  # UTC 15시 = KST 00시
