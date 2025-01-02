@@ -1,8 +1,5 @@
 import boto3
-# from awsglue.context import GlueContext
 from pyspark.context import SparkContext
-# from awsglue.job import Job
-# from awsglue.utils import getResolvedOptions
 import sys
 import pytz
 import logging
