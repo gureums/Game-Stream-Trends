@@ -31,7 +31,6 @@ class Config:
 
     @staticmethod
     def get_s3_client():
-        # Ensure that boto3 client is returned correctly
         return boto3.client(
             's3',
             aws_access_key_id=Config.AWS_ACCESS_KEY,
@@ -41,17 +40,14 @@ class Config:
     @staticmethod
     def upload_to_s3(data, key):
         try:
-            # Convert data to json string and upload to S3
             json_data = json.dumps(data, indent=4)
             buffer = io.BytesIO(json_data.encode('utf-8'))
-            # Get the s3 client and upload the data
             s3_client = Config.get_s3_client()
             s3_client.upload_fileobj(buffer, Config.S3_BUCKET_NAME, key)
             logging.info(f"Successfully uploaded data to S3 with key: {key}")
         except Exception as e:
             raise RuntimeError(f"Failed to upload to S3 (key: {key}): {e}")
 
-    # S3 로깅 설정
     class S3LogHandler(logging.Handler):
         def __init__(self, bucket_name, date_str, data_type, buffer_size=10):
             super().__init__()
@@ -77,7 +73,6 @@ class Config:
             try:
                 timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
                 s3_key = f"logs/twitch/{self.data_type}/{self.date_str}/fetch_{self.data_type}_{timestamp}.log"
-                # Get the s3 client and upload logs
                 s3_client = Config.get_s3_client()
                 s3_client.put_object(
                     Bucket=self.bucket_name,
