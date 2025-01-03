@@ -21,8 +21,8 @@ task_info = [
 
 default_args = {
     'owner': 'BEOMJUN',
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retries': 5,
+    'retry_delay': timedelta(minutes=10),
     'start_date': datetime(2024, 12, 20, 15, 0),  # UTC 15시 = KST 00시
     'depends_on_past': False,
     'email_on_failure': True,
@@ -30,7 +30,7 @@ default_args = {
 }
 
 dag = DAG(
-    'steam_data_fetch_daily',
+    'steam_bronze_daily',
     default_args=default_args,
     description='Collecting details, news, discounts, and review metadata for each Steam appid every day at midnight in KST.',
     schedule_interval="0 15 * * *",
