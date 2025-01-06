@@ -76,7 +76,7 @@ try:
     file_save_count = 0
 
     current_time = start_date
-    while current_time < end_date:
+    while current_time <= end_date:
         try:
             formatted_date = current_time.strftime("%Y-%m-%d")
             formatted_hour = current_time.strftime("%H")
