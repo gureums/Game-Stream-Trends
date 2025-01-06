@@ -1,4 +1,4 @@
-name: Deploy Backend via Bastion Host
+name: Deploy Backend
 
 on:
   push:
@@ -13,10 +13,10 @@ jobs:
       - name: SSH to Bastion Host and execute commands
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.BASTION_HOST }}
-          username: ${{ secrets.BASTION_USER }}
+          host: ${{ secrets.WEB_HOST }}
+          username: ${{ secrets.WEB_USER }}
           key: ${{ secrets.BASTION_KEY }}
           script_stop: true  
           script: |
-            cd /home/${{ secrets.BASTION_USER }}
-            ssh -i gureum-private.pem ${{ secrets.WEB_USER }}@${{ secrets.WEB_BACK_HOST }} 'bash deploy.sh'
+            cd /home/${{ secrets.WEB_USER }}
+            bash deploy_back.sh
