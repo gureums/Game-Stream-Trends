@@ -1,7 +1,8 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 import sys
 import os
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datetime import datetime, timedelta
 
 script_path = os.path.join(os.path.dirname(__file__), '../../scripts/twitch')
@@ -17,8 +18,8 @@ task_info = [
 
 default_args = {
     'owner': 'BEOMJUN',
-    'retries': 5,
-    'retry_delay': timedelta(minutes=10),
+    'retries': 3,
+    'retry_delay': timedelta(minutes=5),
     'start_date': datetime(2024, 12, 20, 15, 0),  # UTC 15시 = KST 00시
     'depends_on_past': False,
     'email_on_failure': True,
@@ -36,11 +37,21 @@ dag = DAG(
     tags=['twitch', 'bronze', '4-hourly'],
 )
 
+tasks = []
 for task_id, python_callable in task_info:
-    PythonOperator(
+    task = PythonOperator(
         task_id=task_id,
         python_callable=python_callable,
         retries=default_args['retries'],
         start_date=default_args['start_date'],
         dag=dag,
     )
+    tasks.append(task)
+
+trigger_silver_dag = TriggerDagRunOperator(
+    task_id="trigger_silver_dag",
+    trigger_dag_id="twitch_silver",
+    dag=dag,
+)
+
+tasks >> trigger_silver_dag
