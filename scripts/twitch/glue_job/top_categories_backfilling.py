@@ -8,6 +8,7 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
+from pyspark.sql.functions import col, explode
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType
 
 KST = pytz.timezone('Asia/Seoul')
@@ -62,6 +63,8 @@ try:
         ]), True)
     ])
 
+    file_save_count = 0
+
     current_time = start_date
     while current_time < end_date:
         try:
@@ -87,11 +90,15 @@ try:
 
             processed_df.coalesce(1).write.mode("overwrite").parquet(processed_path)
             logger.info(f"Processed data saved to: {processed_path}")
+            
+            file_save_count += 1
 
         except Exception as e:
             logger.error("Error processing data for date %s and hour %s: %s", formatted_date, formatted_hour, str(e))
 
         current_time += timedelta(hours=1)
+        
+    logger.info(f"Total files saved: {file_save_count}")
 
     try:
         job.commit()
