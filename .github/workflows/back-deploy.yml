@@ -19,4 +19,4 @@ jobs:
           script_stop: true  
           script: |
             cd /home/${{ secrets.BASTION_USER }}
-            ssh -i gureum-private.pem ${{ secrets.WEB_USER }}@${{ secrets.WEB_BACK_HOST }} 'bash ./deploy.sh'
+            ssh -i gureum-private.pem ${{ secrets.WEB_USER }}@${{ secrets.WEB_BACK_HOST }} 'bash deploy.sh'
