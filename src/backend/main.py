@@ -9,7 +9,7 @@ app = FastAPI()
 
 @app.get('/api')
 async def root():
-    return {"message": "Hello FastAPI!"}
+    return {"message": "Hello, API Server of Team gureum"}
                
 app.add_middleware(
     CORSMiddleware,
