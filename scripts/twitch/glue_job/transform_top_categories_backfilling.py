@@ -8,7 +8,6 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from pyspark.sql.functions import col, explode
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType
 
 KST = pytz.timezone('Asia/Seoul')
