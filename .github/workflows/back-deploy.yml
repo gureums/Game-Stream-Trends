@@ -1,0 +1,22 @@
+name: Deploy Backend via Bastion Host
+
+on:
+  push:
+    branches:
+      - feature/web-back
+
+jobs:
+  deploy:
+    name: Deploy to Internal Instance
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to Bastion Host and execute commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.BASTION_HOST }}
+          username: ${{ secrets.BASTION_USER }}
+          key: ${{ secrets.BASTION_KEY }}
+          script_stop: true  
+          script: |
+            cd /home/ubuntu
+            ssh -i gureum-private.pem ${{ secrets.WEB_USER }}@${{ secrets.WEB_BACK_HOST }} 'bash ./deploy.sh'
