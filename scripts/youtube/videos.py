@@ -6,7 +6,7 @@ from datetime import datetime
 from dotenv import load_dotenv  # .env 파일 로드
 
 # .env 파일 로드
-load_dotenv()
+load_dotenv()  
 
 # API 키와 엔드포인트 설정
 API_KEY = os.getenv("YTB_API_KEY")  # .env에서 API 키 가져오기
