@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import AboutView from '@/views/AboutView.vue';
+import NotFoundPage from "@/views/404Page.vue";
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'Home',
     component: HomeView,
   },
@@ -12,6 +13,11 @@ const routes = [
     path: '/about',
     name: 'About',
     component: AboutView,
+  },
+  {
+    path: "/:pathMatch(.*)*", // 모든 매칭되지 않는 경로
+    name: "not-found",
+    component: NotFoundPage,
   },
 ];
 
