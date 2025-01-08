@@ -11,32 +11,29 @@
 # print(f"Ratelimit-Reset: {ratelimit_reset}")
 
 import json
-import boto3
-import os
 import io
 import logging
 import pytz
+import boto3
 from datetime import datetime
-from dotenv import load_dotenv
+from airflow.models import Variable
+# from airflow.providers.amazon.aws.hooks.base_aws import AwsBaseHook
 
 KST = pytz.timezone('Asia/Seoul')
-load_dotenv()
 
 class Config:
-    TWC_CLIENT_ID = os.getenv('TWC_CLIENT_ID')
-    TWC_ACCESS_TOKEN = os.getenv('TWC_ACCESS_TOKEN')
-    AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_KEY')
-    S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
+    TWC_CLIENT_ID = Variable.get("TWC_CLIENT_ID")
+    TWC_ACCESS_TOKEN = Variable.get("TWC_ACCESS_TOKEN")
+    S3_BUCKET_NAME = Variable.get("S3_BUCKET_NAME")
+    # AWS_CONNECTION_ID = "aws_gureum"
 
     @staticmethod
     def get_s3_client():
-        return boto3.client(
-            's3',
-            aws_access_key_id=Config.AWS_ACCESS_KEY,
-            aws_secret_access_key=Config.AWS_SECRET_ACCESS_KEY
-        )
-
+        return boto3.client('s3')
+        # hook = AwsBaseHook(aws_conn_id=Config.AWS_CONNECTION_ID)
+        # session = hook.get_session()
+        # return session.client('s3')
+    
     @staticmethod
     def upload_to_s3(data, key):
         try:
@@ -57,14 +54,15 @@ class Config:
             self.buffer_size = buffer_size
             self.log_buffer = io.StringIO()
             self.buffer = []
-
+            self.s3_client = Config.get_s3_client()
+        
         def emit(self, record):
             msg = self.format(record)
             self.log_buffer.write(msg + "\n")
             self.buffer.append(record)
             if len(self.buffer) >= self.buffer_size:
                 self.flush()
-
+                
         def flush(self):
             if len(self.buffer) == 0:
                 return
@@ -73,8 +71,7 @@ class Config:
             try:
                 timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
                 s3_key = f"logs/twitch/{self.data_type}/{self.date_str}/fetch_{self.data_type}_{timestamp}.log"
-                s3_client = Config.get_s3_client()
-                s3_client.put_object(
+                self.s3_client.put_object(
                     Bucket=self.bucket_name,
                     Key=s3_key,
                     Body=self.log_buffer.getvalue().encode('utf-8')
