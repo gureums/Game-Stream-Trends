@@ -9,7 +9,7 @@ server {
         return 301 /home;
     }
 
-    location /home {
+    location / {
         try_files $uri $uri/ /index.html;
     }
 }
