@@ -5,7 +5,7 @@
         Whoops! <br />
         We couldn't find that page.
       </p>
-      <router-link to="/" class="home-link">Main page</router-link>
+      <router-link to="/home" class="home-link">Main page</router-link>
     </div>
   </template>
   

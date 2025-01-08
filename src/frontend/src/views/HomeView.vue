@@ -1,208 +1,117 @@
 <template>
     <div class="home-container">
-      <AppSidebar />
-      <div class="content-container">
-        <header class="header">
-          <h1 class="title">New and trending</h1>
-          <p class="subtitle">Based on player counts and release date</p>
-          <div class="filter-options">
-            <div class="order-button" @click="toggleDropdown">
-              <span>Order by:</span>
-              <span class="selected-option">{{ selectedOption }}</span>
-              <i class="fas fa-chevron-down"></i>
-            </div>
-            <div v-if="dropdownOpen" class="dropdown-menu">
-              <div
-                class="dropdown-item"
-                v-for="option in filterOptions"
-                :key="option"
-                @click="selectOption(option)"
-              >
-                <span>{{ option }}</span>
-                <i v-if="option === selectedOption" class="fas fa-check"></i>
-              </div>
-            </div>
-          </div>
-        </header>
-        <main class="content">
-          <GameCard
-            v-for="game in filteredGames"
-            :key="game.title"
+      <header class="home-header">
+        <h1 class="title">Trending Games</h1>
+        <p class="subtitle">Latest stats and updates from top games</p>
+      </header>
+      <main class="home-content">
+        <div class="trending-header">
+          <span>Rank</span>
+          <span>Game</span>
+          <span>Watch Time</span>
+          <span>Stream Time</span>
+          <span>Peak Viewers</span>
+        </div>
+        <div class="trending-list">
+          <TrendingCard
+            v-for="game in trendingGames"
+            :key="game.id"
+            :rank="game.rank"
             :title="game.title"
-            :likes="game.likes"
             :image="game.image"
+            :watchTime="game.watchTime"
+            :watchTimeChange="game.watchTimeChange"
+            :streamTime="game.streamTime"
+            :streamTimeChange="game.streamTimeChange"
+            :peakViewers="game.peakViewers"
+            :peakViewersChange="game.peakViewersChange"
           />
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   </template>
   
   <script>
-  import AppSidebar from "@/components/Sidebar.vue";
-  import GameCard from "@/components/GameCard.vue";
+  import TrendingCard from "@/components/TrendingCard.vue";
   
   export default {
     name: "HomeView",
     components: {
-      AppSidebar,
-      GameCard,
+      TrendingCard,
     },
     data() {
       return {
-        dropdownOpen: false,
-        selectedOption: "Popularity",
-        filterOptions: [
-          "Popularity",
-          "Date added",
-          "Name",
-          "Release date",
-          "Average rating",
-        ],
-        games: [
-          { title: "Satisfactory", likes: 2641, image: require("@/assets/images/placeholder.png") },
-          { title: "V Rising", likes: 1852, image: require("@/assets/images/placeholder.png") },
-          { title: "STALKER 2", likes: 941, image: require("@/assets/images/placeholder.png") },
-          { title: "TEST 1", likes: 503, image: require("@/assets/images/placeholder.png") },
-          { title: "TEST 2", likes: 37, image: require("@/assets/images/placeholder.png") },
-          { title: "TEST 3", likes: 1, image: require("@/assets/images/placeholder.png") },
+        trendingGames: [
+          {
+            id: 1,
+            rank: 1,
+            title: "Kings League",
+            image: "https://via.placeholder.com/50",
+            watchTime: "6,020,454",
+            watchTimeChange: 153.9,
+            streamTime: "1,713",
+            streamTimeChange: 217.2,
+            peakViewers: "494,778",
+            peakViewersChange: 1857.3,
+          },
+          {
+            id: 2,
+            rank: 2,
+            title: "Escape from Tarkov",
+            image: "https://via.placeholder.com/50",
+            watchTime: "5,107,211",
+            watchTimeChange: -88.5,
+            streamTime: "19,553",
+            streamTimeChange: -88.5,
+            peakViewers: "-4,397",
+            peakViewersChange: -102,
+          },
+          // 추가 데이터...
         ],
       };
-    },
-    computed: {
-      filteredGames() {
-        // 간단한 필터링 로직 (선택된 옵션에 따라 동작 추가 가능)
-        if (this.selectedOption === "Relevance") {
-          return this.games;
-        }
-        if (this.selectedOption === "Popularity") {
-          return [...this.games].sort((a, b) => b.likes - a.likes);
-        }
-        return this.games; // 기본 반환
-      },
-    },
-    methods: {
-      toggleDropdown() {
-        this.dropdownOpen = !this.dropdownOpen;
-      },
-      selectOption(option) {
-        this.selectedOption = option;
-        this.dropdownOpen = false;
-      },
     },
   };
   </script>
   
   <style scoped>
-  /* 전체 컨테이너 */
+  /* 홈 페이지 전체 스타일 */
   .home-container {
-    display: flex;
-  }
-  
-  /* 콘텐츠 컨테이너 */
-  .content-container {
-    flex-grow: 1;
     padding: 20px;
+    background-color: #121212;
+    color: #ffffff;
+    min-height: 100vh;
   }
   
   /* 헤더 스타일 */
-  .header {
+  .home-header {
+    text-align: center;
     margin-bottom: 20px;
   }
   
   .title {
-    font-size: 4.5rem;
+    font-size: 2.5rem;
     font-weight: bold;
-    margin: 0 0 10px 0;
   }
   
   .subtitle {
     font-size: 1rem;
-    margin: 0 0 20px 0;
+    color: #aaaaaa;
   }
   
-  /* 필터 옵션 스타일 */
-  .filter-options {
-    margin-top: 10px;
-    position: relative;
-  }
-  
-  .order-button {
-    display: inline-flex;
-    align-items: center;
-    background-color: #212121;
-    color: #ffffff;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  
-  .order-button span:first-child {
-    margin-right: 8px;
-    color: #dfdfdf;
-  }
-  
-  .selected-option {
+  /* 테이블 헤더 스타일 */
+  .trending-header {
+    display: grid;
+    grid-template-columns: 50px 2fr 1fr 1fr 1fr;
+    padding: 10px 0;
+    border-bottom: 2px solid #333;
     font-weight: bold;
+    color: #ffffff;
   }
   
-  .order-button i {
-    font-size: 0.8rem;
-    margin-left: 8px;
-  }
-  
-  /* 드롭다운 메뉴 */
-  .dropdown-menu {
-    position: absolute;
-    top: 50px;
-    left: 0;
-    background-color: #fff;
-    color: #1e1e1e;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(91, 89, 89, 0.2);
-    padding: 8px 0;
-    z-index: 1000;
-  }
-  
-  .dropdown-item {
+  /* 리스트 스타일 */
+  .trending-list {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 16px;
-    cursor: pointer;
+    flex-direction: column;
   }
-  
-  .dropdown-item:hover {
-    background-color: #c3c3c3;
-  }
-  
-  .dropdown-item i {
-    color: #00c853; /* 체크 아이콘 색상 (녹색) */
-  }
-
-  /* 콘텐츠 그리드 스타일 */
-.content {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 한 줄에 4개씩 */
-  gap: 20px; /* 카드 간격 */
-}
-
-/* 게임 카드 스타일 */
-.game-card {
-  background-color: #1e1e1e;
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.game-card img {
-  width: 100%;
-  height: auto;
-  border-radius: 12px;
-  margin-bottom: 10px;
-}
   </style>
   

@@ -9,7 +9,7 @@
             <div class="icon-container">
               <i class="fas fa-home"></i>
             </div>
-            <a href="/">Home</a>
+            <a href="/home">Home</a>
           </li>
           <li>
             <div class="icon-container">
@@ -22,7 +22,7 @@
               <div class="icon-container-small">
                 <i class="fas fa-star"></i>
               </div>
-              <a href="#">Top Rated</a>
+              <a href="/steam">Top Rated</a>
             </li>
             <li class="submenu-item">
               <div class="icon-container-small">
