@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'dags/**'
+      - 'scripts/**'
     branches:
       - develop
 
@@ -26,5 +27,5 @@ jobs:
 
       - name: Upload S3
         run:
-          # --delete -> 원본 경로에서 삭제될 시 S3에서도 삭제되도록 함
           aws s3 sync --delete dags s3://${{ secrets.AWS_S3_BUCKET_NAME }}
+          aws s3 sync --delete scripts s3://${{ secrets.AWS_S3_BUCKET_NAME }}
