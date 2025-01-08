@@ -45,7 +45,8 @@ def main():
 
         if combined_details:
             date_str = datetime.now(KST).strftime('%Y-%m-%d')
-            filename = f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}.json'
+            timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
+            filename = f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}_{timestamp}.json'
             Config.upload_to_s3(combined_details, filename)
             # filename = f'data/raw/steam/{DATA_TYPE}/{date_str}/test_{DATA_TYPE}.json'
             # Config.upload_to_s3(combined_details, filename)

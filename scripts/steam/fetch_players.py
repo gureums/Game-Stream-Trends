@@ -40,7 +40,8 @@ def main():
         if combined_players:
             date_str = datetime.now(KST).strftime('%Y-%m-%d')
             hour_str = datetime.now(KST).strftime('%H')
-            Config.upload_to_s3(combined_players, f'data/raw/steam/{DATA_TYPE}/{date_str}/{hour_str}/combined_{DATA_TYPE}.json')
+            timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
+            Config.upload_to_s3(combined_players, f'data/raw/steam/{DATA_TYPE}/{date_str}/{hour_str}/combined_{DATA_TYPE}_{timestamp}.json')
             logging.info("Combined players data uploaded successfully.")
         else:
             logging.error("No players data collected to upload.")

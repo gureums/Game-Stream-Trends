@@ -22,7 +22,8 @@ def create_headers():
 def save_data_to_s3(data, page_num):
     date_str = datetime.now(KST).strftime('%Y-%m-%d')
     hour_str = datetime.now(KST).strftime('%H')
-    file_name = f"data/raw/twitch/{DATA_TYPE}/{date_str}/{hour_str}/fetch_{DATA_TYPE}_{page_num}.json"
+    timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
+    file_name = f"data/raw/twitch/{DATA_TYPE}/{date_str}/{hour_str}/fetch_{DATA_TYPE}_{page_num}_{timestamp}.json"
     Config.upload_to_s3(data, file_name)
     logging.info(f"Streams data for page {page_num} uploaded to S3 with key: {file_name}")
 

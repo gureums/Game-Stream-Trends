@@ -39,7 +39,8 @@ def main():
 
         if combined_review_metas:
             date_str = datetime.now(KST).strftime('%Y-%m-%d')
-            Config.upload_to_s3(combined_review_metas, f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}.json')
+            timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
+            Config.upload_to_s3(combined_review_metas, f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}_{timestamp}.json')
             logging.info("Combined review_metas data uploaded successfully.")
         else:
             logging.error("No review_metas data collected to upload.")

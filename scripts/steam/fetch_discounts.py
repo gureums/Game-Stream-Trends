@@ -41,7 +41,8 @@ def main():
 
             if combined_discounts:
                 date_str = datetime.now(KST).strftime('%Y-%m-%d')
-                chunk_key = f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}_{idx}.json'
+                timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
+                chunk_key = f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}_{idx}_{timestamp}.json'
                 Config.upload_to_s3(combined_discounts, chunk_key)
                 logging.info(f"Discount data for chunk {idx} uploaded to S3: {chunk_key}")
             else:

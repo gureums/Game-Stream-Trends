@@ -39,7 +39,8 @@ def main():
 
         if combined_news:
             date_str = datetime.now(KST).strftime('%Y-%m-%d')
-            Config.upload_to_s3(combined_news, f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}.json')
+            timestamp = datetime.now(KST).strftime('%Y-%m-%d_%H-%M-%S')
+            Config.upload_to_s3(combined_news, f'data/raw/steam/{DATA_TYPE}/{date_str}/combined_{DATA_TYPE}_{timestamp}.json')
             logging.info("Combined news data uploaded successfully.")
         else:
             logging.error("No news data collected to upload.")
