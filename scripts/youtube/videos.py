@@ -26,7 +26,7 @@ params = {
 }
 
 # 로그 설정
-log_dir = os.path.join("logs")  # logs 디렉토리 설정
+log_dir = os.path.join("logs", "youtube")  # logs/youtube 디렉토리 설정
 os.makedirs(log_dir, exist_ok=True)  # 디렉토리 생성
 current_time = datetime.now().strftime("%Y%m%d_%H%M")
 log_file = os.path.join(log_dir, f"youtube_fetch_{current_time}.log")
@@ -51,7 +51,7 @@ def fetch_all_pages():
     # 저장 경로 설정 (현재 시간 반영)
     save_dir = os.path.join("data", "raw", "youtube", "video")
     os.makedirs(save_dir, exist_ok=True)
-    save_path = os.path.join(save_dir, f"mostpopular_youtube_data_{current_time}.json")
+    save_path = os.path.join(save_dir, f"youtube_dataapi_{current_time}.json")
 
     logging.info(f"데이터 저장 경로: {save_path}")
 

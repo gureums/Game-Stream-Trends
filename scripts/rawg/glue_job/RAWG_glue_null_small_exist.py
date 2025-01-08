@@ -42,10 +42,8 @@ flattened_df = selected_df.select(
     F.expr("transform(tags, x -> x.name)").alias("tags")  # tags의 name 평탄화
 )
 
-# id와 name이 null이 아닌 데이터만 필터링
-filtered_df = flattened_df.filter(
-    F.col("id").isNotNull() & F.col("name").isNotNull()  # id와 name이 모두 null이 아닌 레코드를 유지
-)
+# id가 null이 아닌 데이터만 필터링
+filtered_df = flattened_df.filter(F.col("id").isNotNull())  # id가 null인 레코드를 제외
 
 # 필터링된 DataFrame을 다시 DynamicFrame으로 변환
 filtered_dynamic_frame = DynamicFrame.fromDF(

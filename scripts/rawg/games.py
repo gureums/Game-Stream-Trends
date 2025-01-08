@@ -3,22 +3,22 @@ import asyncio
 import json
 import os
 from datetime import datetime
-from dotenv import load_dotenv
 import logging
 import re
+from dotenv import load_dotenv  # .env 파일 로드
 
-# env 파일 로드
-load_dotenv(dotenv_path="env")
+# .env 파일 로드
+load_dotenv()  
+
 
 # RAWG API 키
 API_KEY = os.getenv("RAWG_API_KEY1")
 BASE_URL = "https://api.rawg.io/api/games"
 
 # 로그 설정
-logs_dir = "logs"
+logs_dir = os.path.join("logs", "rawg")  # logs/rawg 디렉토리 설정
 os.makedirs(logs_dir, exist_ok=True)
-log_file = os.path.join(logs_dir, "RAWG", f"games_per50_{datetime.now().strftime('%Y%m%d_%H%M')}.log")
-
+log_file = os.path.join(logs_dir, f"games_per50_{datetime.now().strftime('%Y%m%d_%H%M')}.log")
 
 # 로그 설정 - 터미널과 파일에 동시 출력
 logger = logging.getLogger()
@@ -132,8 +132,8 @@ async def fetch_and_save_pages(start_page, page_size, output_dir, max_calls=2000
 
 # 전체 데이터 가져오기 함수
 async def fetch_all_data(page_size):
-    # 기존 games 디렉토리가 아닌 games_json 디렉토리에 저장
-    output_dir = os.path.join("data", "raw", "RAWG", "games_json")
+    # JSON 파일 저장 경로를 data/raw/rawg로 설정
+    output_dir = os.path.join("data", "raw", "rawg")
     os.makedirs(output_dir, exist_ok=True)
 
     start_page = get_last_saved_page(output_dir)
