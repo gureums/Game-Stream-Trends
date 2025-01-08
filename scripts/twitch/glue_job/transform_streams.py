@@ -50,7 +50,7 @@ def get_latest_last_modified(s3_path):
         return None
 
 try:
-    args = getResolvedOptions(sys.argv, ["JOB_NAME", "table_name", "base_output_path"])
+    args = getResolvedOptions(sys.argv, ["JOB_NAME", "table_name", "base_output_path", "base_input_path"])
 except Exception as e:
     logger.error("Error parsing job arguments: %s", str(e))
     raise
@@ -69,6 +69,7 @@ except Exception as e:
 try:
     table_name = args["table_name"]
     base_output_path = args["base_output_path"]
+    base_input_path = args["base_input_path"]
 
     now = datetime.now(KST)
     start_time = now - timedelta(hours=24)
@@ -105,7 +106,7 @@ try:
         try:
             formatted_date = current_time.strftime("%Y-%m-%d")
             formatted_hour = current_time.strftime("%H")
-            raw_data_path = f"s3://gureum-bucket/data/raw/twitch/{table_name}/{formatted_date}/{formatted_hour}/"
+            raw_data_path = f"{base_input_path}/{table_name}/{formatted_date}/{formatted_hour}/"
             processed_path = f"{base_output_path}/{table_name}/{formatted_date}/{formatted_hour}/"
 
             if not s3_path_exists(raw_data_path):
