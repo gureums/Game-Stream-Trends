@@ -49,7 +49,8 @@ def fetch_youtube_data():
     current_time = datetime.now(KST)
     date_path = current_time.strftime("%Y-%m-%d")
     hour_path = current_time.strftime("%H")
-    s3_key = f"{S3_PREFIX}/videos/{date_path}/{hour_path}/youtube_videos.json"
+    timestamp = current_time.strftime('%Y-%m-%d_%H-%M-%S')
+    s3_key = f"{S3_PREFIX}/videos/{date_path}/{hour_path}/youtube_videos_{timestamp}.json"
 
     s3 = boto3.client('s3')
 
