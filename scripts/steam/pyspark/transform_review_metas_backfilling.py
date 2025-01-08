@@ -1,19 +1,20 @@
-import sys
-import logging
 import boto3
+import sys
 import pytz
+import logging
 from datetime import datetime, timedelta
-from botocore.exceptions import ClientError
 from awsglue.context import GlueContext
-from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
-from pyspark.sql.types import StructType, StructField, StringType, ArrayType
-from pyspark.sql.functions import input_file_name, regexp_extract, to_timestamp, when, lit
+from awsglue.job import Job
+from botocore.exceptions import ClientError
+from pyspark.sql import Row
+from pyspark.sql.functions import to_timestamp, lit
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 KST = pytz.timezone('Asia/Seoul')
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("gureum-twitch-top-categories-backfilling-glue-job")
+logger = logging.getLogger("gureum-steam-review-metas-backfilling-glue-job-logger")
 
 def s3_path_exists(s3_path):
     s3 = boto3.client("s3")
@@ -71,19 +72,16 @@ try:
     table_name = args["table_name"]
     base_input_path = args["base_input_path"]
     base_output_path = args["base_output_path"]
-
+    
     json_schema = StructType([
-        StructField("data", ArrayType(StructType([
-            StructField("id", StringType(), True),
-            StructField("name", StringType(), True),
-            StructField("box_art_url", StringType(), True),
-            StructField("igdb_id", StringType(), True)
-        ])), True),
-        StructField("pagination", StructType([
-            StructField("cursor", StringType(), True)
-        ]), True)
+        StructField("app_id", StringType(), True),
+        StructField("review_score", IntegerType(), True),
+        StructField("review_score_desc", StringType(), True),
+        StructField("total_positive", IntegerType(), True),
+        StructField("total_negative", IntegerType(), True),
+        StructField("total_reviews", IntegerType(), True),
     ])
-
+    
     file_save_count = 0
 
     timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})\.json"
@@ -91,30 +89,26 @@ try:
     while current_time <= end_date:
         try:
             formatted_date = current_time.strftime("%Y-%m-%d")
-            formatted_hour = current_time.strftime("%H")
-            raw_data_path = f"{base_input_path}/{table_name}/{formatted_date}/{formatted_hour}/"
-            processed_path = f"{base_output_path}/{table_name}/{formatted_date}/{formatted_hour}/"
+            raw_data_path = f"{base_input_path}/{table_name}/{formatted_date}/"
+            processed_path = f"{base_output_path}/{table_name}/{formatted_date}/"
 
             if not s3_path_exists(raw_data_path):
                 logger.info("Raw data path does not exist, skipping: %s", raw_data_path)
-                current_time += timedelta(hours=1)
+                current_time += timedelta(days=1)
                 continue
 
             if s3_path_exists(processed_path):
                 logger.info("Skipping already processed path: %s", processed_path)
-                current_time += timedelta(hours=1)
+                current_time += timedelta(days=1)
                 continue
 
             logger.info(f"Processing data from: {raw_data_path}")
-            raw_df = spark.read.option("multiline", "true").schema(json_schema).json(raw_data_path)
-
-            raw_df = raw_df.withColumn("file_path", input_file_name())
-
-            raw_df = raw_df.withColumn(
-                "collected_at_raw",
-                regexp_extract("file_path", timestamp_pattern, 1)
+            dynamic_frame = glueContext.create_dynamic_frame.from_options(
+                connection_type="s3",
+                connection_options={"paths": [raw_data_path]},
+                format="json"
             )
-
+            
             last_modified = get_latest_last_modified(raw_data_path)
             if last_modified:
                 last_modified_str = last_modified.strftime("%Y-%m-%d-%H-%M-%S")
@@ -122,30 +116,38 @@ try:
                 last_modified_str = None
 
             default_timestamp = (
-                last_modified_str if last_modified_str else f"{formatted_date}-{formatted_hour}-00-00"
-            )
-
-            raw_df = raw_df.withColumn(
-                "collected_at",
-                to_timestamp(
-                    when(raw_df["collected_at_raw"] != "", raw_df["collected_at_raw"])
-                    .otherwise(lit(default_timestamp)),
-                    "yyyy-MM-dd-HH-mm-ss"
-                )
+                last_modified_str if last_modified_str else f"{formatted_date}-00-00-00"
             )
             
-            processed_df = raw_df.selectExpr("inline(data)", "collected_at")
-            processed_df = processed_df.select("id", "name", "igdb_id", "collected_at")
+            collected_at_value = default_timestamp
 
-            processed_df.coalesce(1).write.mode("overwrite").parquet(processed_path)
+            raw_df = dynamic_frame.toDF()
+            flattened_rdd = raw_df.rdd.flatMap(lambda row: row.asDict().items()).map(
+                lambda x: Row(
+                    app_id=x[0],
+                    review_score=x[1]['query_summary']['review_score'],
+                    review_score_desc=x[1]['query_summary']['review_score_desc'],
+                    total_positive=x[1]['query_summary']['total_positive'],
+                    total_negative=x[1]['query_summary']['total_negative'],
+                    total_reviews=x[1]['query_summary']['total_reviews'],
+                )
+            )
+
+            flattened_data = spark.createDataFrame(flattened_rdd, schema = json_schema)
+            flattened_data = flattened_data.withColumn(
+                "collected_at",
+                to_timestamp(lit(collected_at_value), "yyyy-MM-dd-HH-mm-ss")
+            )
+
+            flattened_data.coalesce(1).write.mode("overwrite").parquet(processed_path)
             logger.info(f"Processed data saved to: {processed_path}")
             
             file_save_count += 1
 
         except Exception as e:
-            logger.error("Error processing data for date %s and hour %s: %s", formatted_date, formatted_hour, str(e))
+            logger.error("Error processing data for date %s: %s", formatted_date, str(e))
 
-        current_time += timedelta(hours=1)
+        current_time += timedelta(days=1)
         
     logger.info(f"Total files saved: {file_save_count}")
 

@@ -1,19 +1,20 @@
-import sys
-import logging
 import boto3
+import sys
 import pytz
+import logging
 from datetime import datetime, timedelta
-from botocore.exceptions import ClientError
 from awsglue.context import GlueContext
-from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
-from pyspark.sql.types import StructType, StructField, StringType, ArrayType
-from pyspark.sql.functions import input_file_name, regexp_extract, to_timestamp, when, lit
+from awsglue.job import Job
+from botocore.exceptions import ClientError
+from pyspark.sql import Row
+from pyspark.sql.functions import to_timestamp, lit
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 KST = pytz.timezone('Asia/Seoul')
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("gureum-twitch-top-categories-backfilling-glue-job")
+logger = logging.getLogger("gureum-steam-players-backfilling-glue-job-logger")
 
 def s3_path_exists(s3_path):
     s3 = boto3.client("s3")
@@ -71,19 +72,13 @@ try:
     table_name = args["table_name"]
     base_input_path = args["base_input_path"]
     base_output_path = args["base_output_path"]
-
+    
     json_schema = StructType([
-        StructField("data", ArrayType(StructType([
-            StructField("id", StringType(), True),
-            StructField("name", StringType(), True),
-            StructField("box_art_url", StringType(), True),
-            StructField("igdb_id", StringType(), True)
-        ])), True),
-        StructField("pagination", StructType([
-            StructField("cursor", StringType(), True)
-        ]), True)
+        StructField("app_id", StringType(), True),
+        StructField("player_count", IntegerType(), True),
+        StructField("result", IntegerType(), True),
     ])
-
+    
     file_save_count = 0
 
     timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})\.json"
@@ -106,15 +101,12 @@ try:
                 continue
 
             logger.info(f"Processing data from: {raw_data_path}")
-            raw_df = spark.read.option("multiline", "true").schema(json_schema).json(raw_data_path)
-
-            raw_df = raw_df.withColumn("file_path", input_file_name())
-
-            raw_df = raw_df.withColumn(
-                "collected_at_raw",
-                regexp_extract("file_path", timestamp_pattern, 1)
+            dynamic_frame = glueContext.create_dynamic_frame.from_options(
+                connection_type="s3",
+                connection_options={"paths": [raw_data_path]},
+                format="json"
             )
-
+            
             last_modified = get_latest_last_modified(raw_data_path)
             if last_modified:
                 last_modified_str = last_modified.strftime("%Y-%m-%d-%H-%M-%S")
@@ -124,20 +116,24 @@ try:
             default_timestamp = (
                 last_modified_str if last_modified_str else f"{formatted_date}-{formatted_hour}-00-00"
             )
+            
+            collected_at_value = default_timestamp
 
-            raw_df = raw_df.withColumn(
-                "collected_at",
-                to_timestamp(
-                    when(raw_df["collected_at_raw"] != "", raw_df["collected_at_raw"])
-                    .otherwise(lit(default_timestamp)),
-                    "yyyy-MM-dd-HH-mm-ss"
+            raw_df = dynamic_frame.toDF()
+            flattened_rdd = raw_df.rdd.flatMap(lambda row: row.asDict().items()).map(
+                lambda x: Row(
+                    app_id=str(x[0]),
+                    player_count=int(x[1]['response']['player_count']),
+                    result=int(x[1]['response']['result']),
                 )
             )
-            
-            processed_df = raw_df.selectExpr("inline(data)", "collected_at")
-            processed_df = processed_df.select("id", "name", "igdb_id", "collected_at")
+            flattened_data = spark.createDataFrame(flattened_rdd, schema = json_schema)
+            flattened_data = flattened_data.withColumn(
+                "collected_at",
+                to_timestamp(lit(collected_at_value), "yyyy-MM-dd-HH-mm-ss")
+            )
 
-            processed_df.coalesce(1).write.mode("overwrite").parquet(processed_path)
+            flattened_data.coalesce(1).write.mode("overwrite").parquet(processed_path)
             logger.info(f"Processed data saved to: {processed_path}")
             
             file_save_count += 1
