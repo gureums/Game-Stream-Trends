@@ -86,7 +86,7 @@ try:
 
     file_save_count = 0
 
-    timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})\.json"
+    timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.json"
     current_time = start_date
     while current_time <= end_date:
         try:
@@ -117,12 +117,13 @@ try:
 
             last_modified = get_latest_last_modified(raw_data_path)
             if last_modified:
-                last_modified_str = last_modified.strftime("%Y-%m-%d-%H-%M-%S")
+                last_modified_kst = last_modified.astimezone(KST)
+                last_modified_str = last_modified_kst.strftime("%Y-%m-%d_%H-%M-%S")
             else:
                 last_modified_str = None
 
             default_timestamp = (
-                last_modified_str if last_modified_str else f"{formatted_date}-{formatted_hour}-00-00"
+                last_modified_str if last_modified_str else f"{formatted_date}_{formatted_hour}-00-00"
             )
 
             raw_df = raw_df.withColumn(
@@ -130,7 +131,7 @@ try:
                 to_timestamp(
                     when(raw_df["collected_at_raw"] != "", raw_df["collected_at_raw"])
                     .otherwise(lit(default_timestamp)),
-                    "yyyy-MM-dd-HH-mm-ss"
+                    "yyyy-MM-dd_HH-mm-ss"
                 )
             )
             

@@ -7,9 +7,8 @@ from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 from awsglue.job import Job
 from botocore.exceptions import ClientError
-from pyspark.sql import Row
-from pyspark.sql.functions import to_timestamp, lit
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType, LongType
+from pyspark.sql.functions import col, lit, regexp_extract, input_file_name, to_timestamp, when
 
 KST = pytz.timezone('Asia/Seoul')
 
@@ -29,7 +28,7 @@ def s3_path_exists(s3_path):
     except Exception as e:
         logger.error("Unexpected error in s3_path_exists: %s", str(e))
         return False
-    
+
 def get_latest_last_modified(s3_path):
     s3 = boto3.client("s3")
     bucket_name = "gureum-bucket"
@@ -51,10 +50,11 @@ def get_latest_last_modified(s3_path):
         return None
 
 try:
-    args = getResolvedOptions(sys.argv, ["JOB_NAME", "start_date", "end_date", "table_name", "base_output_path", "base_input_path"])
+    args = getResolvedOptions(sys.argv, ["JOB_NAME", "table_name", "base_output_path", "base_input_path", "start_date", "end_date"])
 except Exception as e:
     logger.error("Error parsing job arguments: %s", str(e))
     raise
+
 try:
     from pyspark.context import SparkContext
     sc = SparkContext()
@@ -70,21 +70,12 @@ try:
     start_date = datetime.strptime(args["start_date"], "%Y-%m-%d")
     end_date = datetime.strptime(args["end_date"], "%Y-%m-%d") + timedelta(days=1)
     table_name = args["table_name"]
-    base_input_path = args["base_input_path"]
     base_output_path = args["base_output_path"]
-    
-    json_schema = StructType([
-        StructField("app_id", StringType(), True),
-        StructField("review_score", IntegerType(), True),
-        StructField("review_score_desc", StringType(), True),
-        StructField("total_positive", IntegerType(), True),
-        StructField("total_negative", IntegerType(), True),
-        StructField("total_reviews", IntegerType(), True),
-    ])
+    base_input_path = args["base_input_path"]
     
     file_save_count = 0
-
-    timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})\.json"
+    
+    timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.json"
     current_time = start_date
     while current_time <= end_date:
         try:
@@ -103,43 +94,80 @@ try:
                 continue
 
             logger.info(f"Processing data from: {raw_data_path}")
-            dynamic_frame = glueContext.create_dynamic_frame.from_options(
-                connection_type="s3",
-                connection_options={"paths": [raw_data_path]},
-                format="json"
+
+            logger.info("Reading raw data from S3...")
+            raw_data = spark.read.option("multiline", "true").json(raw_data_path)
+            logger.info("Raw data schema:")
+            raw_data.printSchema()
+
+            logger.info("Extracting top-level keys...")
+            top_level_keys = [field.name for field in raw_data.schema.fields if field.dataType.typeName() == "struct"]
+            logger.info("Top-level keys found: %s", top_level_keys)
+            
+            logger.info("Extracting file path and collected_at timestamp...")
+            raw_data = raw_data.withColumn("file_path", input_file_name())
+            raw_data = raw_data.withColumn(
+                "collected_at_raw", 
+                regexp_extract(col("file_path"), timestamp_pattern, 1)
             )
             
             last_modified = get_latest_last_modified(raw_data_path)
             if last_modified:
-                last_modified_str = last_modified.strftime("%Y-%m-%d-%H-%M-%S")
+                last_modified_kst = last_modified.astimezone(KST)
+                last_modified_str = last_modified_kst.strftime("%Y-%m-%d_%H-%M-%S")
             else:
                 last_modified_str = None
 
             default_timestamp = (
-                last_modified_str if last_modified_str else f"{formatted_date}-00-00-00"
+                last_modified_str if last_modified_str else f"{formatted_date}_00-00-00"
             )
-            
-            collected_at_value = default_timestamp
 
-            raw_df = dynamic_frame.toDF()
-            flattened_rdd = raw_df.rdd.flatMap(lambda row: row.asDict().items()).map(
-                lambda x: Row(
-                    app_id=x[0],
-                    review_score=x[1]['query_summary']['review_score'],
-                    review_score_desc=x[1]['query_summary']['review_score_desc'],
-                    total_positive=x[1]['query_summary']['total_positive'],
-                    total_negative=x[1]['query_summary']['total_negative'],
-                    total_reviews=x[1]['query_summary']['total_reviews'],
+            raw_data = raw_data.withColumn(
+                "collected_at",
+                to_timestamp(
+                    when(raw_data["collected_at_raw"] != "", raw_data["collected_at_raw"])
+                    .otherwise(lit(default_timestamp)),
+                    "yyyy-MM-dd_HH-mm-ss"
                 )
             )
 
-            flattened_data = spark.createDataFrame(flattened_rdd, schema = json_schema)
-            flattened_data = flattened_data.withColumn(
-                "collected_at",
-                to_timestamp(lit(collected_at_value), "yyyy-MM-dd-HH-mm-ss")
+            query_summary_schema = StructType([
+                StructField("review_score", IntegerType(), True),
+                StructField("review_score_desc", StringType(), True),
+                StructField("total_positive", LongType(), True),
+                StructField("total_negative", LongType(), True),
+                StructField("total_reviews", LongType(), True),
+            ])
+
+            logger.info("Ensuring all app_id columns have a query_summary field...")
+            for key in top_level_keys:
+                if "query_summary" not in [f.name for f in raw_data.schema[key].dataType.fields]:
+                    logger.info(f"Adding missing query_summary field for app_id {key}")
+                    raw_data = raw_data.withColumn(f"`{key}`.query_summary", lit(None).cast(query_summary_schema))
+
+            logger.info("Preparing data for parallel processing...")
+            standardized_columns = [
+                f"struct('{key}' as app_id, `{key}`.query_summary.review_score as review_score, "
+                f"`{key}`.query_summary.review_score_desc as review_score_desc, "
+                f"`{key}`.query_summary.total_positive as total_positive, "
+                f"`{key}`.query_summary.total_negative as total_negative, "
+                f"`{key}`.query_summary.total_reviews as total_reviews, "
+                f"collected_at as collected_at)"
+                for key in top_level_keys
+            ]
+
+            logger.info("Processing data in parallel using inline...")
+            exploded_df = raw_data.selectExpr(
+                "inline(array(" + ",".join(standardized_columns) + "))"
             )
 
-            flattened_data.coalesce(1).write.mode("overwrite").parquet(processed_path)
+            logger.info("Transformed data schema:")
+            exploded_df.printSchema()
+            logger.info("Preview of transformed data:")
+            exploded_df.show(5, truncate=False)
+
+            logger.info("Writing transformed data to S3...")
+            exploded_df.coalesce(1).write.mode("overwrite").parquet(processed_path)
             logger.info(f"Processed data saved to: {processed_path}")
             
             file_save_count += 1

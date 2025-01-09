@@ -9,7 +9,8 @@ from awsglue.job import Job
 from botocore.exceptions import ClientError
 from pyspark.sql import Row
 from pyspark.sql.functions import to_timestamp, lit
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.types import StructType, StructField, IntegerType
+from pyspark.sql.functions import col, lit, regexp_extract, input_file_name, to_timestamp, when
 
 KST = pytz.timezone('Asia/Seoul')
 
@@ -73,18 +74,12 @@ try:
     base_input_path = args["base_input_path"]
 
     now = datetime.now(KST)
-    start_time = now - timedelta(hours=24)
+    start_time = now - timedelta(days=1)
     end_time = now
-    
-    json_schema = StructType([
-        StructField("app_id", StringType(), True),
-        StructField("player_count", IntegerType(), True),
-        StructField("result", IntegerType(), True),
-    ])
     
     file_save_count = 0
     
-    timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})\.json"
+    timestamp_pattern = r".*_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.json"
     current_time = start_time
     while current_time <= end_time:
         try:
@@ -104,39 +99,73 @@ try:
                 continue
 
             logger.info(f"Processing data from: {raw_data_path}")
-            dynamic_frame = glueContext.create_dynamic_frame.from_options(
-                connection_type="s3",
-                connection_options={"paths": [raw_data_path]},
-                format="json"
+            logger.info("Reading raw data from S3...")
+            raw_data = spark.read.option("multiline", "true").json(raw_data_path)
+            logger.info("Raw data schema:")
+            raw_data.printSchema()
+
+            logger.info("Extracting top-level keys...")
+            top_level_keys = [field.name for field in raw_data.schema.fields if field.dataType.typeName() == "struct"]
+            logger.info("Top-level keys found: %s", top_level_keys)
+            
+            logger.info("Extracting file path and collected_at timestamp...")
+            raw_data = raw_data.withColumn("file_path", input_file_name())
+            raw_data = raw_data.withColumn(
+                "collected_at_raw", 
+                regexp_extract(col("file_path"), timestamp_pattern, 1)
             )
             
             last_modified = get_latest_last_modified(raw_data_path)
             if last_modified:
-                last_modified_str = last_modified.strftime("%Y-%m-%d-%H-%M-%S")
+                last_modified_kst = last_modified.astimezone(KST)
+                last_modified_str = last_modified_kst.strftime("%Y-%m-%d_%H-%M-%S")
             else:
                 last_modified_str = None
 
             default_timestamp = (
-                last_modified_str if last_modified_str else f"{formatted_date}-{formatted_hour}-00-00"
+                last_modified_str if last_modified_str else f"{formatted_date}_{formatted_hour}-00-00"
             )
-            
-            collected_at_value = default_timestamp
 
-            raw_df = dynamic_frame.toDF()
-            flattened_rdd = raw_df.rdd.flatMap(lambda row: row.asDict().items()).map(
-                lambda x: Row(
-                    app_id=str(x[0]),
-                    player_count=int(x[1]['response']['player_count']),
-                    result=int(x[1]['response']['result']),
+            raw_data = raw_data.withColumn(
+                "collected_at",
+                to_timestamp(
+                    when(raw_data["collected_at_raw"] != "", raw_data["collected_at_raw"])
+                    .otherwise(lit(default_timestamp)),
+                    "yyyy-MM-dd_HH-mm-ss"
                 )
             )
-            flattened_data = spark.createDataFrame(flattened_rdd, schema = json_schema)
-            flattened_data = flattened_data.withColumn(
-                "collected_at",
-                to_timestamp(lit(collected_at_value), "yyyy-MM-dd-HH-mm-ss")
+
+            response_schema = StructType([
+                StructField("player_count", IntegerType(), True),
+                StructField("result", IntegerType(), True),
+            ])
+
+            logger.info("Ensuring all app_id columns have a response field...")
+            for key in top_level_keys:
+                if "response" not in [f.name for f in raw_data.schema[key].dataType.fields]:
+                    logger.info(f"Adding missing response field for app_id {key}")
+                    raw_data = raw_data.withColumn(f"`{key}`.response", lit(None).cast(response_schema))
+
+            logger.info("Preparing data for parallel processing...")
+            standardized_columns = [
+                f"struct('{key}' as app_id, `{key}`.response.player_count as player_count, "
+                f"`{key}`.response.result as result, "
+                f"collected_at as collected_at)"
+                for key in top_level_keys
+            ]
+
+            logger.info("Processing data in parallel using inline...")
+            exploded_df = raw_data.selectExpr(
+                "inline(array(" + ",".join(standardized_columns) + "))"
             )
 
-            flattened_data.coalesce(1).write.mode("overwrite").parquet(processed_path)
+            logger.info("Transformed data schema:")
+            exploded_df.printSchema()
+            logger.info("Preview of transformed data:")
+            exploded_df.show(5, truncate=False)
+
+            logger.info("Writing transformed data to S3...")
+            exploded_df.coalesce(1).write.mode("overwrite").parquet(processed_path)
             logger.info(f"Processed data saved to: {processed_path}")
             
             file_save_count += 1
