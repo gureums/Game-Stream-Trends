@@ -6,8 +6,6 @@ on:
     paths:
       - 'dags/**'
       - 'scripts/**'
-    branches:
-      - '*'
 
 jobs:
   build:
