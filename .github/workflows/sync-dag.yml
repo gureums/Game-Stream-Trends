@@ -7,7 +7,7 @@ on:
       - 'dags/**'
       - 'scripts/**'
     branches:
-      - feature/sync-dag
+      - '*'
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3.3.0
         with:
-          ref: feature/sync-dag
+          ref: ${{ github.ref_name }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
