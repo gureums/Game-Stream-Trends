@@ -1,7 +1,7 @@
 <template>
     <div class="home-container">
       <header class="home-header">
-        <h1 class="title">Trending Games</h1>
+        <h1 class="title">Game & Stream Trends</h1>
         <p class="subtitle">Latest stats and updates from top games</p>
       </header>
       <main class="home-content">
@@ -84,18 +84,19 @@
   
   /* 헤더 스타일 */
   .home-header {
-    text-align: center;
+    text-align: left; /* 좌측 정렬 */
     margin-bottom: 20px;
   }
   
   .title {
-    font-size: 2.5rem;
+    font-size: 4rem;
     font-weight: bold;
+    margin: 0;
   }
   
   .subtitle {
     font-size: 1rem;
-    color: #aaaaaa;
+    margin-top: 5px;
   }
   
   /* 테이블 헤더 스타일 */

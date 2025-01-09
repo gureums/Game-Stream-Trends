@@ -15,14 +15,14 @@
             <div class="icon-container">
               <img src="@/assets/images/steam.png" alt="Steam" class="custom-icon" />
             </div>
-            <span>Steam</span>
+            <a href="/steam">Steam</a>
           </li>
           <ul class="submenu">
             <li class="submenu-item">
               <div class="icon-container-small">
                 <i class="fas fa-star"></i>
               </div>
-              <a href="/steam">Top Rated</a>
+              <a href="#">Top Rated</a>
             </li>
             <li class="submenu-item">
               <div class="icon-container-small">
@@ -41,7 +41,7 @@
             <div class="icon-container">
               <img src="@/assets/images/youtube.png" alt="Steam" class="custom-icon" />
             </div>
-            <span>Youtube</span>
+            <a href="/youtube">Youtube</a>
           </li>
           <ul class="submenu">
             <li class="submenu-item">
@@ -67,7 +67,7 @@
             <div class="icon-container">
               <img src="@/assets/images/twitch.png" alt="Twitch" class="custom-icon" />
             </div>
-            <span>Twitch</span>
+            <a href="/twitch">Twitch</a>
           </li>
           <ul class="submenu">
             <li class="submenu-item">

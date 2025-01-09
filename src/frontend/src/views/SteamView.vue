@@ -103,18 +103,18 @@
   
   /* 헤더 스타일 */
   .header {
+    text-align: left;
     margin-bottom: 20px;
   }
   
   .title {
-    font-size: 4.5rem;
+    font-size: 4rem;
     font-weight: bold;
-    margin: 0 0 10px 0;
   }
   
   .subtitle {
     font-size: 1rem;
-    margin: 0 0 20px 0;
+    margin-top: 5px;
   }
   
   /* 필터 옵션 스타일 */

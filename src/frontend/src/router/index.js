@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import SteamView from '@/views/SteamView.vue';
-import AboutView from '@/views/AboutView.vue';
+import YoutubeView from '@/views/YoutubeView.vue';
+import TwitchView from '@/views/TwitchView.vue';
 import NotFoundPage from "@/views/404Page.vue";
 
 const routes = [
@@ -20,9 +21,14 @@ const routes = [
         component: SteamView,
       },
       {
-        path: '/about',
-        name: 'About',
-        component: AboutView,
+        path: '/youtube',
+        name: 'Youtube',
+        component: YoutubeView,
+      },
+      {
+        path: '/twitch',
+        name: 'Twitch',
+        component: TwitchView,
       },
     ]
   },
