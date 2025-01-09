@@ -16,3 +16,8 @@ echo "package install success"
 
 npm run build
 echo "static build success"
+
+sudo systemctl restart nginx
+echo "nginx restart complete"
+
+sudo systemctl status nginx
