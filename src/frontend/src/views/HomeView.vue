@@ -1,30 +1,22 @@
 <template>
     <div class="home-container">
       <header class="home-header">
-        <h1 class="title">Game & Stream Trends</h1>
-        <p class="subtitle">Latest stats and updates from top games</p>
+        <h1 class="title">Game & Stream Stats Overview</h1>
+        <p class="subtitle">Check out the most played & watched games on various platforms!</p>
       </header>
       <main class="home-content">
-        <div class="trending-header">
-          <span>Rank</span>
-          <span>Game</span>
-          <span>Watch Time</span>
-          <span>Stream Time</span>
-          <span>Peak Viewers</span>
-        </div>
-        <div class="trending-list">
-          <TrendingCard
-            v-for="game in trendingGames"
-            :key="game.id"
-            :rank="game.rank"
-            :title="game.title"
-            :image="game.image"
-            :watchTime="game.watchTime"
-            :watchTimeChange="game.watchTimeChange"
-            :streamTime="game.streamTime"
-            :streamTimeChange="game.streamTimeChange"
-            :peakViewers="game.peakViewers"
-            :peakViewersChange="game.peakViewersChange"
+        <div class="summary-cards">
+          <SummaryCard
+            title="Most Played Games on Steam"
+            :games="steamGames"
+          />
+          <SummaryCard
+            title="Most Watched Games on YouTube"
+            :games="youtubeGames"
+          />
+          <SummaryCard
+            title="Most Watched Games on Twitch"
+            :games="twitchGames"
           />
         </div>
       </main>
@@ -32,41 +24,68 @@
   </template>
   
   <script>
-  import TrendingCard from "@/components/TrendingCard.vue";
+  import SummaryCard from "@/components/SummaryCard.vue";
   
   export default {
     name: "HomeView",
     components: {
-      TrendingCard,
+      SummaryCard,
     },
     data() {
       return {
-        trendingGames: [
+        steamGames: [
           {
             id: 1,
-            rank: 1,
-            title: "Kings League",
+            title: "Just Chatting",
             image: "https://via.placeholder.com/50",
-            watchTime: "6,020,454",
-            watchTimeChange: 153.9,
-            streamTime: "1,713",
-            streamTimeChange: 217.2,
-            peakViewers: "494,778",
-            peakViewersChange: 1857.3,
+            hoursWatched: "62,620,974",
+            growth: 3.9,
+            extraHours: "+2,376,817",
           },
           {
             id: 2,
-            rank: 2,
-            title: "Escape from Tarkov",
+            title: "Grand Theft Auto V",
             image: "https://via.placeholder.com/50",
-            watchTime: "5,107,211",
-            watchTimeChange: -88.5,
-            streamTime: "19,553",
-            streamTimeChange: -88.5,
-            peakViewers: "-4,397",
-            peakViewersChange: -102,
+            hoursWatched: "20,914,806",
+            growth: 34.8,
+            extraHours: "+5,399,456",
           },
-          // 추가 데이터...
+        ],
+        youtubeGames: [
+          {
+            id: 1,
+            title: "League of Legends",
+            image: "https://via.placeholder.com/50",
+            hoursWatched: "18,668,831",
+            growth: 37.7,
+            extraHours: "+5,115,895",
+          },
+          {
+            id: 2,
+            title: "Marvel Rivals",
+            image: "https://via.placeholder.com/50",
+            hoursWatched: "15,953,350",
+            growth: 16.6,
+            extraHours: "+2,265,815",
+          },
+        ],
+        twitchGames: [
+          {
+            id: 1,
+            title: "World of Warcraft",
+            image: "https://via.placeholder.com/50",
+            hoursWatched: "15,438,553",
+            growth: 30.6,
+            extraHours: "+3,615,801",
+          },
+          {
+            id: 2,
+            title: "Valorant",
+            image: "https://via.placeholder.com/50",
+            hoursWatched: "14,125,678",
+            growth: 12.3,
+            extraHours: "+1,725,432",
+          },
         ],
       };
     },
@@ -74,45 +93,35 @@
   </script>
   
   <style scoped>
-  /* 홈 페이지 전체 스타일 */
   .home-container {
     padding: 20px;
     background-color: #121212;
     color: #ffffff;
-    min-height: 100vh;
   }
   
-  /* 헤더 스타일 */
   .home-header {
-    text-align: left; /* 좌측 정렬 */
-    margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 30px;
   }
   
   .title {
-    font-size: 4rem;
+    font-size: 3.5rem;
     font-weight: bold;
-    margin: 0;
   }
   
   .subtitle {
     font-size: 1rem;
-    margin-top: 5px;
   }
   
-  /* 테이블 헤더 스타일 */
-  .trending-header {
-    display: grid;
-    grid-template-columns: 50px 2fr 1fr 1fr 1fr;
-    padding: 10px 0;
-    border-bottom: 2px solid #333;
-    font-weight: bold;
-    color: #ffffff;
-  }
-  
-  /* 리스트 스타일 */
-  .trending-list {
+  /* Summary Cards Container */
+  .summary-cards {
     display: flex;
-    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .summary-card {
+    flex: 1;
+    max-width: 33%;
   }
   </style>
   

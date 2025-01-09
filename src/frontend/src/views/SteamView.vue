@@ -2,7 +2,7 @@
     <div class="home-container">
       <div class="content-container">
         <header class="header">
-          <h1 class="title">New and trending</h1>
+          <h1 class="title">Steam trending</h1>
           <p class="subtitle">Based on player counts and release date</p>
           <div class="filter-options">
             <div class="order-button" @click="toggleDropdown">
