@@ -1,8 +1,9 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 import sys
 import os
 from datetime import datetime, timedelta
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 script_path = os.path.join(os.path.dirname(__file__), '../../scripts/steam')
 sys.path.insert(0, script_path)
@@ -40,11 +41,21 @@ dag = DAG(
     tags=['steam', 'bronze', 'daily'],
 )
 
+tasks = []
 for task_id, python_callable in task_info:
-    PythonOperator(
+    task = PythonOperator(
         task_id=task_id,
         python_callable=python_callable,
         retries=default_args['retries'],
         start_date=default_args['start_date'],
         dag=dag,
     )
+    tasks.append(task)
+
+trigger_silver_dag = TriggerDagRunOperator(
+    task_id="trigger_steam_silver_daily",
+    trigger_dag_id="steam_silver_daily",
+    dag=dag,
+)
+
+tasks >> trigger_silver_dag
