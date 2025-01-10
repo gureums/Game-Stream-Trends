@@ -35,8 +35,8 @@ wait_for_bronze_daily = ExternalTaskSensor(
 )
 
 trigger_glue_job_review_metas = GlueJobOperator(
-    task_id="gureum-steam-review-metas-in-use",
-    job_name="gureum-twitch-top-categories",
+    task_id="run_review_metas_glue_job",
+    job_name="gureum-steam-review-metas-in-use",
     region_name="ap-northeast-2",
     aws_conn_id="aws_gureum",
     wait_for_completion=True,
