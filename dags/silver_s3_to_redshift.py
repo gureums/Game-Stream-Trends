@@ -61,24 +61,25 @@ with DAG(
     catchup=False,
     tags=['steam', 'silver'],
 ) as dag:
-    
-    wait_for_daily_dag = ExternalTaskSensor(
-        task_id='wait_for_daily_dag',
-        external_dag_id='steam_silver_daily',
-        external_task_id=None,
-        mode='reschedule',
-        timeout=3600,
-        poke_interval=3600,
-    )    
 
-    wait_for_4hourly_dag = ExternalTaskSensor(
-        task_id='wait_for_4hourly_dag',
-        external_dag_id='steam_silver_4hourly',
-        external_task_id=None,
-        mode='reschedule',
-        timeout=3600,
-        poke_interval=3600,
-    )
+    sensor_configs = [
+        {'task_id': 'wait_for_daily_dag_1', 'external_dag_id': 'steam_silver_daily'},
+        {'task_id': 'wait_for_daily_dag_2', 'external_dag_id': 'steam_silver_4hourly'},
+        {'task_id': 'wait_for_daily_dag_3', 'external_dag_id': 'twitch_silver'},
+        {'task_id': 'wait_for_daily_dag_4', 'external_dag_id': 'youtube_silver'},
+    ]
+
+    sensors = []
+    for config in sensor_configs:
+        sensor = ExternalTaskSensor(
+            task_id=config['task_id'],
+            external_dag_id=config['external_dag_id'],
+            external_task_id=None,
+            mode='reschedule',
+            timeout=3600,
+            poke_interval=3600,
+        )
+        sensors.append(sensor)
 
     for source, tables in TABLES.items():
         print(f"Processing source: {source}")
@@ -117,7 +118,7 @@ with DAG(
                         FORMAT AS PARQUET;
                     """,
                 )
-                [wait_for_daily_dag, wait_for_4hourly_dag] >> drop_staging_table >> create_staging_table >> copy_to_staging
+                sensors >> drop_staging_table >> create_staging_table >> copy_to_staging
                 copy_tasks.append(copy_to_staging)
 
             merge_to_main_table = SQLExecuteQueryOperator(
