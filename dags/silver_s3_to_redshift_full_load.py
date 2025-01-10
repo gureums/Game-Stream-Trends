@@ -92,7 +92,7 @@ with DAG(
             copy_tasks = [] 
             for s3_path in s3_paths:
                 copy_to_staging = SQLExecuteQueryOperator(
-                    task_id=f'copy_to_{table_name}_staging_{s3_path.split("/")[-2]}_{s3_path.split("/")[-1]}',
+                    task_id=f'copy_to_{table_name}_staging_{s3_path.split('/')[-3]}_{s3_path.split('/')[-2]}_{s3_path.split('/')[-1]}',
                     conn_id='redshift-gureum',
                     sql=f"""
                         COPY {REDSHIFT_SILVER_SCHEMA}.{table_name}_staging ({', '.join(columns)})
@@ -105,7 +105,7 @@ with DAG(
                 copy_tasks.append(copy_to_staging)
 
             merge_to_main_table = SQLExecuteQueryOperator(
-                task_id=f'merge_to_main_table_{table_name}',
+                task_id=f'merge_to_main_table_{table_name}_{s3_path.split('/')[-3]}_{s3_path.split('/')[-2]}_{s3_path.split('/')[-1]}',
                 conn_id='redshift-gureum',
                 sql=f"""
                     INSERT INTO {REDSHIFT_SILVER_SCHEMA}.{table_name} ({', '.join(columns)})
