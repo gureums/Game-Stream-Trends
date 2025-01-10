@@ -87,21 +87,21 @@ TABLES = {
             'interval': '4-hourly',
             'table_name': 'youtube_videos',
             'staging_schema': """
-                CREATE TABLE IF NOT EXISTS silver.youtube_videos (
+                CREATE TABLE IF NOT EXISTS silver.youtube_videos_staging (
                     video_id VARCHAR(500),
-                    title VARCHAR(500),
-                    description VARCHAR(500),
+                    published_at TIMESTAMP,
                     channel_id VARCHAR(500),
+                    title VARCHAR(500),
+                    description VARCHAR(65535),
                     channel_title VARCHAR(500),
                     tags VARCHAR(500),
-                    like_count BIGINT,
                     view_count BIGINT,
+                    like_count BIGINT,
                     comment_count BIGINT,
-                    published_at TIMESTAMP,
                     collected_at TIMESTAMP
                 );
             """,
-            'columns': ['video_id', 'title', 'description', 'channel_id', 'channel_title', 'tags', 'like_count', 'view_count', 'comment_count', 'published_at', 'collected_at'],
+            'columns': ['video_id', 'published_at', 'channel_id', 'title', 'description', 'channel_title', 'tags', 'view_count', 'like_count', 'comment_count', 'collected_at'],
             's3_path': 'youtube/videos',
             'join_condition': 's.video_id = t.video_id AND s.collected_at = t.collected_at',
             'unique_val': 'video_id'
