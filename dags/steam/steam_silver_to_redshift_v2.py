@@ -112,7 +112,7 @@ with DAG(
                     conn_id='redshift-gureum',
                     sql=f"""
                         COPY {REDSHIFT_SILVER_SCHEMA}.{table_name}_staging ({', '.join(columns)})
-                        FROM 's3://{S3_BUCKET_NAME}/{S3_SILVER_BASE_PATH}/{s3_path}'
+                        FROM 's3://{S3_BUCKET_NAME}/{s3_path}'
                         CREDENTIALS 'aws_iam_role={REDSHIFT_IAM_ROLE}'
                         FORMAT AS PARQUET;
                     """,
