@@ -93,7 +93,7 @@ TABLES = {
                     channel_id VARCHAR(500),
                     title VARCHAR(500),
                     channel_title VARCHAR(500),
-                    tags VARCHAR(500),
+                    tags VARCHAR(65535),
                     view_count BIGINT,
                     like_count BIGINT,
                     comment_count BIGINT,
