@@ -119,7 +119,7 @@ for source, tables in TABLES.items():
                 copy_query = f"""
                     COPY {REDSHIFT_SILVER_SCHEMA}.{table_name}_staging ({', '.join(columns)})
                     FROM 's3://{S3_BUCKET_NAME}/{s3_path}'
-                    CREDENTIALS 'aws_iam_role={REDSHIFT_IAM_ROLE}'
+                    IAM_ROLE '{REDSHIFT_IAM_ROLE}'
                     FORMAT AS PARQUET;
                 """
                 execute_redshift_query(copy_query)
