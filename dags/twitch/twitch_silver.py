@@ -35,7 +35,7 @@ wait_for_bronze_4hourly = ExternalTaskSensor(
 )
 
 trigger_streams_glue_job = GlueJobOperator(
-    task_id="run_first_glue_job",
+    task_id="run_streams_glue_job",
     job_name="gureum-twitch-streams",
     region_name="ap-northeast-2",
     aws_conn_id="aws_gureum",
@@ -44,7 +44,7 @@ trigger_streams_glue_job = GlueJobOperator(
 )
 
 trigger_top_categories_glue_job = GlueJobOperator(
-    task_id="run_second_glue_job",
+    task_id="run_top_categories_glue_job",
     job_name="gureum-twitch-top-categories",
     region_name="ap-northeast-2",
     aws_conn_id="aws_gureum",
