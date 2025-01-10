@@ -59,7 +59,7 @@ TABLES = {
             """,
             'columns': ['id', 'user_name', 'game_id', 'game_name', 'type', 'title', 'viewer_count', 'language', 'is_mature', 'collected_at'],
             's3_path': 'twitch/streams',
-            'join_condition': 's.id = t.id AND s.collected_at = t.collected_at',
+            'join_condition': 's.id = t.id AND s.user_name = t.user_name AND s.collected_at = t.collected_at',
             'unique_val': 'id'
         },
         {
