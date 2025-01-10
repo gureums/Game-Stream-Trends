@@ -1,6 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
 default_args = {
     'owner': 'BEOMJUN',
@@ -23,7 +24,17 @@ dag = DAG(
     tags=['steam', 'silver', '4hourly'],
 )
 
-glue_job_players = GlueJobOperator(
+wait_for_bronze_daily = ExternalTaskSensor(
+    task_id='wait_for_bronze_daily',
+    external_dag_id='steam_bronze_4hourly',
+    external_task_id=None,
+    mode='reschedule',
+    timeout=3600,
+    poke_interval=3600,
+    dag=dag,
+)
+
+trigger_glue_job_players = GlueJobOperator(
     task_id="run_players_glue_job",
     job_name="gureum-steam-players-in-use",
     region_name="ap-northeast-2",
@@ -31,3 +42,5 @@ glue_job_players = GlueJobOperator(
     wait_for_completion=True,
     dag=dag,
 )
+
+wait_for_bronze_daily >> trigger_glue_job_players
