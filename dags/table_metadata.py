@@ -92,7 +92,6 @@ TABLES = {
                     published_at TIMESTAMP,
                     channel_id VARCHAR(500),
                     title VARCHAR(500),
-                    description SUPER,
                     channel_title VARCHAR(500),
                     tags VARCHAR(500),
                     view_count BIGINT,
@@ -101,7 +100,7 @@ TABLES = {
                     collected_at TIMESTAMP
                 );
             """,
-            'columns': ['video_id', 'published_at', 'channel_id', 'title', 'description', 'channel_title', 'tags', 'view_count', 'like_count', 'comment_count', 'collected_at'],
+            'columns': ['video_id', 'published_at', 'channel_id', 'title', 'channel_title', 'tags', 'view_count', 'like_count', 'comment_count', 'collected_at'],
             's3_path': 'youtube/videos',
             'join_condition': 's.video_id = t.video_id AND s.collected_at = t.collected_at',
             'unique_val': 'video_id'
