@@ -126,6 +126,5 @@ with DAG(
                     WHERE ingested_at IS NULL;
                 """,
             )
-            for copy_task in copy_tasks:
-                copy_task >> merge_to_main_table
-            merge_to_main_table >> update_ingested_at
+
+            copy_tasks >> merge_to_main_table >> update_ingested_at
