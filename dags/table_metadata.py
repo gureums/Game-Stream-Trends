@@ -29,7 +29,7 @@ TABLES = {
                     total_positive BIGINT,
                     total_negative BIGINT,
                     total_reviews BIGINT,
-                    collected_at TIMESTAMP,
+                    collected_at TIMESTAMP
                 );
             """,
             'columns': ['app_id', 'review_score', 'review_score_desc', 'total_positive', 'total_negative', 'total_reviews', 'collected_at'],
@@ -54,7 +54,7 @@ TABLES = {
                     viewer_count BIGINT,
                     language VARCHAR(255),
                     is_mature boolean,
-                    collected_at TIMESTAMP,
+                    collected_at TIMESTAMP
                 );
             """,
             'columns': ['id', 'user_name', 'game_id', 'game_name', 'type', 'title', 'viewer_count', 'language', 'is_mature', 'collected_at'],
@@ -72,7 +72,7 @@ TABLES = {
                     name VARCHAR(255),
                     igdb_id VARCHAR(255),
                     rank INT,
-                    collected_at TIMESTAMP,
+                    collected_at TIMESTAMP
                 );
             """,
             'columns': ['id', 'name', 'igdb_id', 'rank', 'collected_at'],
@@ -98,7 +98,7 @@ TABLES = {
                     view_count BIGINT,
                     comment_count BIGINT,
                     published_at TIMESTAMP,
-                    collected_at TIMESTAMP,
+                    collected_at TIMESTAMP
                 );
             """,
             'columns': ['video_id', 'title', 'description', 'channel_id', 'channel_title', 'tags', 'like_count', 'view_count', 'comment_count', 'published_at', 'collected_at'],
