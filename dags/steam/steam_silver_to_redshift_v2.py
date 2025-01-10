@@ -6,6 +6,9 @@ from airflow.models import Variable
 from datetime import datetime, timedelta
 import logging
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from steam_tables import TABLES
 
 REDSHIFT_SILVER_SCHEMA = Variable.get('REDSHIFT_SILVER_SCHEMA')
