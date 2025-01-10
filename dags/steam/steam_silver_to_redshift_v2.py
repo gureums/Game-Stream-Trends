@@ -5,6 +5,7 @@ from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.models import Variable
 from datetime import datetime, timedelta
 import logging
+from pytz import timezone
 
 import sys
 import os
@@ -32,8 +33,8 @@ def generate_valid_s3_paths(execution_date):
     s3_hook = S3Hook(aws_conn_id='aws_gureum')
     valid_paths = []
 
-    execution_date = datetime.strptime(execution_date, '%Y-%m-%d')
-    target_date = execution_date - timedelta(days=1)
+    kst_now = datetime.now(timezone('Asia/Seoul'))
+    target_date = kst_now - timedelta(days=1)
 
     for hour in range(24):
         s3_path = f"{S3_SILVER_BASE_PATH}/steam/players/{target_date.strftime('%Y-%m-%d')}/{hour:02d}/"
