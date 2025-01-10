@@ -29,7 +29,7 @@ TABLES = {
                     total_positive BIGINT,
                     total_negative BIGINT,
                     total_reviews BIGINT,
-                    collected_at TIMESTAMP
+                    collected_at TIMESTAMP,
                 );
             """,
             'columns': ['app_id', 'review_score', 'review_score_desc', 'total_positive', 'total_negative', 'total_reviews', 'collected_at'],
@@ -50,11 +50,11 @@ TABLES = {
                     game_id VARCHAR(255),
                     game_name VARCHAR(255),
                     type VARCHAR(255),
-                    title VARCHAR(255),
+                    title VARCHAR(500),
                     viewer_count BIGINT,
                     language VARCHAR(255),
                     is_mature boolean,
-                    collected_at TIMESTAMP
+                    collected_at TIMESTAMP,
                 );
             """,
             'columns': ['id', 'user_name', 'game_id', 'game_name', 'type', 'title', 'viewer_count', 'language', 'is_mature', 'collected_at'],
@@ -71,13 +71,40 @@ TABLES = {
                     id VARCHAR(255),
                     name VARCHAR(255),
                     igdb_id VARCHAR(255),
-                    collected_at TIMESTAMP
+                    rank INT,
+                    collected_at TIMESTAMP,
                 );
             """,
-            'columns': ['id', 'name', 'igdb_id', 'collected_at'],
+            'columns': ['id', 'name', 'igdb_id', 'rank', 'collected_at'],
             's3_path': 'twitch/top_categories',
             'join_condition': 's.id = t.id AND s.collected_at = t.collected_at',
             'unique_val': 'id',
         },
+    ],
+    'youtube': [
+        {
+            'category': 'videos',
+            'interval': '4-hourly',
+            'table_name': 'youtube_videos',
+            'staging_schema': """
+                CREATE TABLE IF NOT EXISTS silver.youtube_videos (
+                    video_id VARCHAR(500),
+                    title VARCHAR(500),
+                    description VARCHAR(500),
+                    channel_id VARCHAR(500),
+                    channel_title VARCHAR(500),
+                    tags VARCHAR(500),
+                    like_count BIGINT,
+                    view_count BIGINT,
+                    comment_count BIGINT,
+                    published_at TIMESTAMP,
+                    collected_at TIMESTAMP,
+                );
+            """,
+            'columns': ['video_id', 'title', 'description', 'channel_id', 'channel_title', 'tags', 'like_count', 'view_count', 'comment_count', 'published_at', 'collected_at'],
+            's3_path': 'youtube/videos',
+            'join_condition': 's.video_id = t.video_id AND s.collected_at = t.collected_at',
+            'unique_val': 'video_id'
+        }
     ]
 }
