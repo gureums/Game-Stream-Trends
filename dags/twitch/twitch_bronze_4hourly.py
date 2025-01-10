@@ -2,7 +2,7 @@ import sys
 import os
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+# from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datetime import datetime, timedelta
 
 script_path = os.path.join(os.path.dirname(__file__), '../../scripts/twitch')
@@ -48,10 +48,8 @@ for task_id, python_callable in task_info:
     )
     tasks.append(task)
 
-trigger_silver_dag = TriggerDagRunOperator(
-    task_id="trigger_silver_dag",
-    trigger_dag_id="twitch_silver",
-    dag=dag,
-)
-
-tasks >> trigger_silver_dag
+# trigger_silver_dag = TriggerDagRunOperator(
+#     task_id="trigger_silver_dag",
+#     trigger_dag_id="twitch_silver",
+#     dag=dag,
+# )
