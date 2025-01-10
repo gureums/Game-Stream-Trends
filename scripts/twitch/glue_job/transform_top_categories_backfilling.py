@@ -107,25 +107,27 @@ try:
 
             logger.info(f"Processing data from: {raw_data_path}")
             raw_df = spark.read.option("multiline", "true").schema(json_schema).json(raw_data_path)
-
+            
             raw_df = raw_df.withColumn("file_path", input_file_name())
-
+            
             raw_df = raw_df.withColumn(
                 "collected_at_raw",
                 regexp_extract("file_path", timestamp_pattern, 1)
             )
-
+            print("1st raw_df")
+            raw_df.show(truncate=False)
+            
             last_modified = get_latest_last_modified(raw_data_path)
             if last_modified:
                 last_modified_kst = last_modified.astimezone(KST)
                 last_modified_str = last_modified_kst.strftime("%Y-%m-%d_%H-%M-%S")
             else:
                 last_modified_str = None
-
+            
             default_timestamp = (
                 last_modified_str if last_modified_str else f"{formatted_date}_{formatted_hour}-00-00"
             )
-
+            
             raw_df = raw_df.withColumn(
                 "collected_at",
                 to_timestamp(
@@ -134,10 +136,23 @@ try:
                     "yyyy-MM-dd_HH-mm-ss"
                 )
             )
+            print("2nd raw_df")
+            raw_df.show(truncate=False)
             
-            processed_df = raw_df.selectExpr("inline(data)", "collected_at")
-            processed_df = processed_df.select("id", "name", "igdb_id", "collected_at")
-
+            ranked_df = raw_df.selectExpr("posexplode(data) as (pos, element)", "collected_at")
+            
+            ranked_df = ranked_df.withColumn("rank", ranked_df["pos"] + 1)
+            
+            processed_df = ranked_df.select(
+                ranked_df["element.id"].alias("id"),
+                ranked_df["element.name"].alias("name"),
+                ranked_df["element.igdb_id"].alias("igdb_id"),
+                ranked_df["rank"],
+                ranked_df["collected_at"]
+            )
+            
+            processed_df.show(truncate=False)
+            
             processed_df.coalesce(1).write.mode("overwrite").parquet(processed_path)
             logger.info(f"Processed data saved to: {processed_path}")
             

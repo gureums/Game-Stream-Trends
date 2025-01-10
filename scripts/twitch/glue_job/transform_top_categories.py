@@ -95,10 +95,8 @@ try:
         try:
             formatted_date = current_time.strftime("%Y-%m-%d")
             formatted_hour = current_time.strftime("%H")
-            # raw_data_path = f"{base_input_path}/{table_name}/{formatted_date}/{formatted_hour}/"
-            # processed_path = f"{base_output_path}/{table_name}/{formatted_date}/{formatted_hour}/"
-            raw_data_path = "s3://gureum-bucket/data/raw/twitch/top_categories/2025-01-09/08/"
-            processed_path = "s3://gureum-bucket/data/test/"
+            raw_data_path = f"{base_input_path}/{table_name}/{formatted_date}/{formatted_hour}/"
+            processed_path = f"{base_output_path}/{table_name}/{formatted_date}/{formatted_hour}/"
 
             if not s3_path_exists(raw_data_path):
                 logger.info("Raw data path does not exist, skipping: %s", raw_data_path)
@@ -114,7 +112,7 @@ try:
             raw_df = spark.read.option("multiline", "true").schema(json_schema).json(raw_data_path)
             
             raw_df = raw_df.withColumn("file_path", input_file_name())
-
+            
             raw_df = raw_df.withColumn(
                 "collected_at_raw",
                 regexp_extract("file_path", timestamp_pattern, 1)
@@ -128,11 +126,11 @@ try:
                 last_modified_str = last_modified_kst.strftime("%Y-%m-%d_%H-%M-%S")
             else:
                 last_modified_str = None
-
+            
             default_timestamp = (
                 last_modified_str if last_modified_str else f"{formatted_date}_{formatted_hour}-00-00"
             )
-
+            
             raw_df = raw_df.withColumn(
                 "collected_at",
                 to_timestamp(
@@ -144,10 +142,22 @@ try:
             print("2nd raw_df")
             raw_df.show(truncate=False)
             
-            processed_df = raw_df.selectExpr("inline(data)", "collected_at")
-            processed_df = processed_df.select("id", "name", "igdb_id", "collected_at")
-
+            ranked_df = raw_df.selectExpr("posexplode(data) as (pos, element)", "collected_at")
+            
+            ranked_df = ranked_df.withColumn("rank", ranked_df["pos"] + 1)
+            
+            processed_df = ranked_df.select(
+                ranked_df["element.id"].alias("id"),
+                ranked_df["element.name"].alias("name"),
+                ranked_df["element.igdb_id"].alias("igdb_id"),
+                ranked_df["rank"],
+                ranked_df["collected_at"]
+            )
+            
+            processed_df.show(truncate=False)
+            
             processed_df.coalesce(1).write.mode("overwrite").parquet(processed_path)
+
             logger.info(f"Processed data saved to: {processed_path}")
             
             file_save_count += 1
