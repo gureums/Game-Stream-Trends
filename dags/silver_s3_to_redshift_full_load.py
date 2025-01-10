@@ -1,6 +1,7 @@
 from airflow import DAG
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from airflow.utils.task_group import TaskGroup
 from airflow.models import Variable
 from datetime import datetime, timedelta
 import logging
@@ -89,20 +90,20 @@ with DAG(
                 sql=staging_table_schema,
             )
 
-            copy_tasks = [] 
-            for s3_path in s3_paths:
-                copy_to_staging = SQLExecuteQueryOperator(
-                    task_id=f'copy_to_{table_name}_staging_{s3_path.split('/')[-3]}_{s3_path.split('/')[-2]}_{s3_path.split('/')[-1]}',
-                    conn_id='redshift-gureum',
-                    sql=f"""
-                        COPY {REDSHIFT_SILVER_SCHEMA}.{table_name}_staging ({', '.join(columns)})
-                        FROM 's3://{S3_BUCKET_NAME}/{s3_path}'
-                        IAM_ROLE '{REDSHIFT_IAM_ROLE}'
-                        FORMAT AS PARQUET;
-                    """,
-                )
-                drop_staging_table >> create_staging_table >> copy_to_staging
-                copy_tasks.append(copy_to_staging)
+            copy_tasks = []
+            with TaskGroup(group_id=f"{table_name}_copy_tasks") as copy_task_group:
+                for s3_path in s3_paths:
+                    copy_to_staging = SQLExecuteQueryOperator(
+                        task_id=f'copy_to_{table_name}_staging_{s3_path.split('/')[-3]}_{s3_path.split('/')[-2]}_{s3_path.split('/')[-1]}',
+                        conn_id='redshift-gureum',
+                        sql=f"""
+                            COPY {REDSHIFT_SILVER_SCHEMA}.{table_name}_staging ({', '.join(columns)})
+                            FROM 's3://{S3_BUCKET_NAME}/{s3_path}'
+                            IAM_ROLE '{REDSHIFT_IAM_ROLE}'
+                            FORMAT AS PARQUET;
+                        """,
+                    )
+                    copy_tasks.append(copy_to_staging)
 
             merge_to_main_table = SQLExecuteQueryOperator(
                 task_id=f'merge_to_main_table_{table_name}',
@@ -127,4 +128,5 @@ with DAG(
                 """,
             )
 
-            copy_tasks >> merge_to_main_table >> update_ingested_at
+            drop_staging_table >> create_staging_table >> copy_task_group
+            copy_task_group >> merge_to_main_table >> update_ingested_at
