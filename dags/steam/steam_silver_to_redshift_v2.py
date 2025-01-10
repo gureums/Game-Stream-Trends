@@ -32,6 +32,7 @@ def generate_valid_s3_paths(execution_date):
     s3_hook = S3Hook(aws_conn_id='aws_gureum')
     valid_paths = []
 
+    execution_date = datetime.strptime(execution_date, '%Y-%m-%d')
     target_date = execution_date - timedelta(days=1)
 
     for hour in range(24):
