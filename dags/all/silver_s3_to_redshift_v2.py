@@ -51,3 +51,4 @@ with DAG(
     )
 
 sensors >> trigger_glue_job_s3_to_redshift
+
