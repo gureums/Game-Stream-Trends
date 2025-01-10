@@ -57,7 +57,7 @@ with DAG(
     dag_id='silver_s3_to_redshift',
     default_args=default_args,
     description='전날 S3에 적재된 Silver Layer를 Redshift로 COPY',
-    schedule_interval=None,
+    schedule_interval="0 15 * * *",
     catchup=False,
     tags=['steam', 'silver'],
 ) as dag:
