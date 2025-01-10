@@ -131,7 +131,6 @@ try:
                     F.col("snippet.publishedAt").cast(TimestampType()).alias("published_at"),
                     F.col("snippet.channelId").alias("channel_id"),
                     F.col("snippet.title").alias("title"),
-                    F.col("snippet.description").alias("description"),
                     F.col("snippet.channelTitle").alias("channel_title"),
                     F.array_join(F.col("snippet.tags"), ", ").alias("tags"),
                     F.col("statistics.viewCount").cast(LongType()).alias("view_count"),
