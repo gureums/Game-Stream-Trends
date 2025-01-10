@@ -92,7 +92,7 @@ TABLES = {
                     published_at TIMESTAMP,
                     channel_id VARCHAR(500),
                     title VARCHAR(500),
-                    description VARCHAR(65535),
+                    description SUPER,
                     channel_title VARCHAR(500),
                     tags VARCHAR(500),
                     view_count BIGINT,
