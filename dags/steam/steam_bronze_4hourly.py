@@ -16,8 +16,8 @@ task_info = [
 
 default_args = {
     'owner': 'BEOMJUN',
-    'retries': 5,
-    'retry_delay': timedelta(minutes=10),
+    'retries': 3,
+    'retry_delay': timedelta(minutes=5),
     'start_date': datetime(2024, 12, 20, 15, 0),  # UTC 15시 = KST 00시
     'depends_on_past': False,
     'email_on_failure': True,

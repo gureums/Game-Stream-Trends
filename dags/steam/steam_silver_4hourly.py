@@ -17,7 +17,7 @@ dag = DAG(
     'steam_silver_4hourly',
     default_args=default_args,
     description='steam 4hourly DAG가 수집한 Raw JSON 데이터를 Parquet 포맷으로 변환하여 S3 버킷에 저장하고, 변환된 Parquet 파일은 Redshift 테이블로 적재',
-    schedule_interval=None,
+    schedule_interval="0 15,19,23,3,7,11 * * *",
     catchup=False,
     concurrency=4,
     max_active_runs=4,
@@ -29,8 +29,8 @@ wait_for_bronze_daily = ExternalTaskSensor(
     external_dag_id='steam_bronze_4hourly',
     external_task_id=None,
     mode='reschedule',
-    timeout=3600,
-    poke_interval=3600,
+    timeout=1800,
+    poke_interval=300,
     dag=dag,
 )
 
