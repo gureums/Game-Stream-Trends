@@ -45,7 +45,7 @@ def generate_valid_s3_paths():
 s3_paths = generate_valid_s3_paths()
 
 with DAG(
-    dag_id='silver_to_redshift_v3',
+    dag_id='steam_players_s3_to_redshift_full_load',
     default_args=default_args,
     description='Load processed silver data into Redshift using SQLExecuteQueryOperator',
     schedule_interval=None,
