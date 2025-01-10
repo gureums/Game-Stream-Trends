@@ -33,7 +33,7 @@ datasource = glueContext.create_dynamic_frame.from_options(
 # DynamicFrame을 Spark DataFrame으로 변환
 selected_df = datasource.toDF()
 
-# 필요한 필드만 선택하고 중첩된 데이터를 평탄화 및 배열 데이터를 쉼표로 결합된 문자열로 변환
+# 필요한 필드만 선택하고 중첩된 데이터를 평탄화
 flattened_df = selected_df.select(
     F.col("id").alias("id"),
     F.col("name").alias("name"),
@@ -41,12 +41,18 @@ flattened_df = selected_df.select(
     F.col("rating").alias("rating"),
     F.col("ratings_count").alias("ratings_count"),
     F.col("reviews_count").alias("reviews_count"),
-    # platforms 배열을 쉼표로 결합된 문자열로 변환
-    F.expr("concat_ws(', ', transform(platforms, x -> x.platform.name))").alias("platforms"),
-    # genres 배열을 쉼표로 결합된 문자열로 변환
-    F.expr("concat_ws(', ', transform(genres, x -> x.name))").alias("genres"),
-    # tags 배열을 쉼표로 결합된 문자열로 변환
-    F.expr("concat_ws(', ', transform(tags, x -> x.name))").alias("tags")
+    F.expr("transform(platforms, x -> x.platform.name)").alias("platforms"),
+    F.expr("transform(genres, x -> x.name)").alias("genres"),
+    F.expr("transform(tags, x -> x.name)").alias("tags")
+)
+
+# 추가 컬럼: collected_at, deleted_at, ingested_at
+flattened_df = flattened_df.withColumn(
+    "collected_at", F.lit(current_timestamp)  # 현재 시각 (한국 시간)
+).withColumn(
+    "deleted_at", F.lit(None).cast("string")  # 삭제 시간이 없는 경우 null
+).withColumn(
+    "ingested_at", F.date_format(F.current_timestamp() + F.expr("INTERVAL 9 HOURS"), "yyyy-MM-dd HH:mm:ss")  # 현재 시각 (한국 시간)
 )
 
 # id와 name이 null이 아닌 데이터만 필터링
