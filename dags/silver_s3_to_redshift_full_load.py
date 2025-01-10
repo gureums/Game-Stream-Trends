@@ -105,7 +105,7 @@ with DAG(
                 copy_tasks.append(copy_to_staging)
 
             merge_to_main_table = SQLExecuteQueryOperator(
-                task_id=f'merge_to_main_table_{table_name}_{s3_path.split('/')[-3]}_{s3_path.split('/')[-2]}_{s3_path.split('/')[-1]}',
+                task_id=f'merge_to_main_table_{table_name}',
                 conn_id='redshift-gureum',
                 sql=f"""
                     INSERT INTO {REDSHIFT_SILVER_SCHEMA}.{table_name} ({', '.join(columns)})
