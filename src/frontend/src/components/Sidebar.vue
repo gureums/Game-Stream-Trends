@@ -30,63 +30,45 @@
               </div>
               <a href="/steam-mostplayed">Most Played</a>
             </li>
-            <li class="submenu-item">
-              <div class="icon-container-small">
-                <i class="fas fa-clock"></i>
-              </div>
-              <a href="#">Recently Updated</a>
-            </li>
           </ul>
           <li>
             <div class="icon-container">
               <img src="@/assets/images/youtube.png" alt="Steam" class="custom-icon" />
             </div>
-            <a href="/youtube">Youtube</a>
+            <a href="#">Youtube</a>
           </li>
           <ul class="submenu">
             <li class="submenu-item">
               <div class="icon-container-small">
-                <i class="fas fa-star"></i>
+                <i class="fas fa-eye"></i>
               </div>
-              <a href="#">Top Games</a>
+              <a href="/youtube-mostviewed">Most Viewed</a>
             </li>
             <li class="submenu-item">
               <div class="icon-container-small">
-                <i class="fas fa-fire"></i>
+                <i class="fas fa-thumbs-up"></i>
               </div>
-              <a href="#">Most Watched</a>
-            </li>
-            <li class="submenu-item">
-              <div class="icon-container-small">
-                <i class="fas fa-clock"></i>
-              </div>
-              <a href="#">Recently Uploaded</a>
+              <a href="/youtube-mostliked">Most Liked</a>
             </li>
           </ul>
           <li>
             <div class="icon-container">
               <img src="@/assets/images/twitch.png" alt="Twitch" class="custom-icon" />
             </div>
-            <a href="/twitch">Twitch</a>
+            <a href="#">Twitch</a>
           </li>
           <ul class="submenu">
             <li class="submenu-item">
               <div class="icon-container-small">
-                <i class="fas fa-star"></i>
+                <i class="fas fa-gamepad"></i>
               </div>
-              <a href="#">Top Games</a>
+              <a href="/twitch-gamesummary">Game Summary</a>
             </li>
             <li class="submenu-item">
               <div class="icon-container-small">
                 <i class="fas fa-fire"></i>
               </div>
               <a href="#">Most watched</a>
-            </li>
-            <li class="submenu-item">
-              <div class="icon-container-small">
-                <i class="fas fa-clock"></i>
-              </div>
-              <a href="#">Recently Watched</a>
             </li>
           </ul>
         </ul>

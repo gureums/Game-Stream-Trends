@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import SteamTopratedView from '@/views/SteamTopratedView.vue';
 import SteamMostplayedView from '@/views/SteamMostplayedView.vue';
-import YoutubeView from '@/views/YoutubeView.vue';
-import TwitchView from '@/views/TwitchView.vue';
+import YoutubeMostlikedView from '@/views/YoutubeMostlikedView.vue';
+import YoutubeMostviewedView from '@/views/YoutubeMostviewedView.vue';
+import TwitchGamesummaryView from '@/views/TwitchGamesummaryView.vue';
 import NotFoundPage from "@/views/404Page.vue";
 
 const routes = [
@@ -27,14 +28,19 @@ const routes = [
         component: SteamMostplayedView,
       },
       {
-        path: '/youtube',
-        name: 'Youtube',
-        component: YoutubeView,
+        path: '/youtube-mostviewed',
+        name: 'YoutubeMostviewed',
+        component: YoutubeMostviewedView,
       },
       {
-        path: '/twitch',
-        name: 'Twitch',
-        component: TwitchView,
+        path: '/youtube-mostliked',
+        name: 'YoutubeMostliked',
+        component: YoutubeMostlikedView,
+      },
+      {
+        path: '/twitch-gamesummary',
+        name: 'TwitchGamesummary',
+        component: TwitchGamesummaryView,
       },
     ]
   },
