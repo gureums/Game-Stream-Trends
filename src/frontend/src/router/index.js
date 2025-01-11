@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
-import SteamView from '@/views/SteamView.vue';
+import SteamTopratedView from '@/views/SteamTopratedView.vue';
 import YoutubeView from '@/views/YoutubeView.vue';
 import TwitchView from '@/views/TwitchView.vue';
 import NotFoundPage from "@/views/404Page.vue";
@@ -16,9 +16,9 @@ const routes = [
         component: HomeView,
       },
       {
-        path: '/steam',
+        path: '/steam-toprated',
         name: 'Steam',
-        component: SteamView,
+        component: SteamTopratedView,
       },
       {
         path: '/youtube',

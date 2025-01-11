@@ -15,14 +15,14 @@
             <div class="icon-container">
               <img src="@/assets/images/steam.png" alt="Steam" class="custom-icon" />
             </div>
-            <a href="/steam">Steam</a>
+            <a href="#">Steam</a>
           </li>
           <ul class="submenu">
             <li class="submenu-item">
               <div class="icon-container-small">
                 <i class="fas fa-star"></i>
               </div>
-              <a href="#">Top Rated</a>
+              <a href="/steam-toprated">Top Rated</a>
             </li>
             <li class="submenu-item">
               <div class="icon-container-small">
