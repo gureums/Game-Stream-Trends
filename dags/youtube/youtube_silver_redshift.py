@@ -8,12 +8,12 @@ from datetime import timedelta
 
 # 기본 설정
 default_args = {
-    'owner': 'BEOMJUN',
+    'owner': 'kimhee',
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
     'depends_on_past': False,
     'email_on_failure': True,
-    'email': ['cbbsjj0314@gmail.com'],
+    'email': ['wjdeun0642@gmail.com'],
 }
 
 # Airflow Variables 가져오기
