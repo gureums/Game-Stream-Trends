@@ -17,12 +17,20 @@
               Positive Review Ratio
               <span class="sort-icon" :class="getSortIcon('positiveRatio')"></span>
             </th>
+            <th @click="sortTable('positive')">
+              Positives
+              <span class="sort-icon" :class="getSortIcon('positive')"></span>
+            </th>
             <th @click="sortTable('changePositive')">
-              Positives Reviews
+              Positives Changes
               <span class="sort-icon" :class="getSortIcon('changePositive')"></span>
             </th>
+            <th @click="sortTable('negative')">
+              Negatives
+              <span class="sort-icon" :class="getSortIcon('negative')"></span>
+            </th>
             <th @click="sortTable('changeNegative')">
-              Negatives Reviews
+              Negatives Changes
               <span class="sort-icon" :class="getSortIcon('changeNegative')"></span>
             </th>
           </tr>
@@ -43,9 +51,11 @@
               </div>
               <span class="positive-ratio-text">{{ game.positiveRatio }}%</span>
             </td>
+            <td class="positive">{{ formatNumber(game.positive) }}</td>
             <td :class="getChangeClassForPositive(game.changePositive)">
               {{ game.changePositive > 0 ? '+' : '' }}{{ game.changePositive }}
             </td>
+            <td class="negative">{{ formatNumber(game.negative) }}</td>
             <td :class="getChangeClassForNegative(game.changeNegative)">
               {{ game.changeNegative > 0 ? '+' : '' }}{{ game.changeNegative }}
             </td>
@@ -128,6 +138,8 @@ export default {
           positiveRatio: parseFloat(game[1]).toFixed(2),
           changePositive: game[2],
           changeNegative: game[3],
+          positive: game[4],
+          negative: game[5],
         }));
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -146,6 +158,9 @@ export default {
         return this.sortOrder === 1 ? "sort-asc" : "sort-desc";
       }
       return "sort-default";
+    },
+    formatNumber(num) {
+        return num.toLocaleString();
     },
   },
   created() {
