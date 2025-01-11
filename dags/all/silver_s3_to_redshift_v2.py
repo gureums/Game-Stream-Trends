@@ -23,10 +23,10 @@ with DAG(
 ) as dag:
 
     sensor_configs = [
-        {'task_id': 'wait_for_daily_dag_1', 'external_dag_id': 'steam_silver_daily'},
-        {'task_id': 'wait_for_daily_dag_2', 'external_dag_id': 'steam_silver_4hourly'},
-        {'task_id': 'wait_for_daily_dag_3', 'external_dag_id': 'twitch_silver'},
-        {'task_id': 'wait_for_daily_dag_4', 'external_dag_id': 'youtube_silver'},
+        {'task_id': 'wait_for_steam_silver_daily', 'external_dag_id': 'steam_silver_daily'},
+        {'task_id': 'wait_for_steam_silver_4hourly', 'external_dag_id': 'steam_silver_4hourly'},
+        {'task_id': 'wait_for_twitch_silver', 'external_dag_id': 'twitch_silver'},
+        {'task_id': 'wait_for_youtube_silver', 'external_dag_id': 'youtube_silver'},
     ]
 
     sensors = []
