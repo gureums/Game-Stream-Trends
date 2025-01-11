@@ -1,16 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes.test import router as test_router
-from routes.stats import router as stats_router
-import uvicorn
-from uvicorn.config import LOGGING_CONFIG
+from routes.apis import router as api_router
 
 app = FastAPI()
 
-@app.get('/api')
-async def root():
-    return {"message": "Hello, API Server of Team gureum"}
-               
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,5 +12,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(test_router)
-app.include_router(stats_router)
+
+@app.get('/api')
+async def root():
+    return {"message": "Hello, API Server of Team gureum"}
+               
+app.include_router(api_router)
+
