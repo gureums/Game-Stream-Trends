@@ -10,7 +10,7 @@ jobs:
     name: Deploy to Internal Instance
     runs-on: ubuntu-latest
     steps:
-      - name: SSH to Bastion Host and execute commands
+      - name: SSH to Web Host and execute commands
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.WEB_HOST }}
