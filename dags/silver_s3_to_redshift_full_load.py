@@ -62,7 +62,7 @@ with DAG(
     description='START_DATE ~ END_DATE 사이의 S3에 적재된 Silver Layer를 Redshift로 COPY',
     schedule_interval=None,
     catchup=False,
-    tags=['steam', 'silver'],
+    tags=['steam', 'twitch', 'youtube', 'silver', 'trigger-only'],
 ) as dag:
 
     for source, tables in TABLES.items():

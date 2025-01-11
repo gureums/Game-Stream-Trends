@@ -59,7 +59,7 @@ with DAG(
     description='전날 S3에 적재된 Silver Layer를 Redshift로 COPY',
     schedule_interval="0 15 * * *",
     catchup=False,
-    tags=['steam', 'silver'],
+    tags=['steam', 'twitch', 'youtube', 'silver', 'daily'],
 ) as dag:
 
     sensor_configs = [
