@@ -52,4 +52,4 @@ trigger_top_categories_glue_job = GlueJobOperator(
     dag=dag,
 )
 
-wait_for_bronze_4hourly >> trigger_streams_glue_job, trigger_top_categories_glue_job
+wait_for_bronze_4hourly >> (trigger_streams_glue_job, trigger_top_categories_glue_job)
