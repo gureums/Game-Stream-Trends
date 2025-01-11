@@ -43,11 +43,11 @@
               </div>
               <span class="positive-ratio-text">{{ game.positiveRatio }}%</span>
             </td>
-            <td :class="getChangeClass(game.changePositive)">
-              +{{ game.changePositive }}
+            <td :class="getChangeClassForPositive(game.changePositive)">
+              {{ game.changePositive > 0 ? '+' : '' }}{{ game.changePositive }}
             </td>
-            <td class="negative-review">
-              +{{ game.changeNegative }}
+            <td :class="getChangeClassForNegative(game.changeNegative)">
+              {{ game.changeNegative > 0 ? '+' : '' }}{{ game.changeNegative }}
             </td>
           </tr>
         </tbody>
@@ -91,10 +91,30 @@ export default {
     getBarColor(positiveRatio) {
       if (positiveRatio >= 85) {
         return "#2196f3"; // Blue
-      } else if (positiveRatio >= 60) {
+      } else if (positiveRatio >= 75) {
         return "#4caf50"; // Green
-      } else {
+      } else if (positiveRatio >= 50) {
         return "#ffeb3b"; // Yellow
+      } else {
+        return "#D0312D"; // Red
+      }
+    },
+    getChangeClassForPositive(change) {
+      if (change > 0) {
+        return "positive"; // Green
+      } else if (change < 0) {
+        return "neutral"; // Yellow
+      } else {
+        return "";
+      }
+    },
+    getChangeClassForNegative(change) {
+      if (change > 0) {
+        return "negative"; // Red
+      } else if (change < 0) {
+        return "neutral"; // Yellow
+      } else {
+        return "";
       }
     },
     async fetchSteamData() {
@@ -127,9 +147,6 @@ export default {
       }
       return "sort-default";
     },
-    getChangeClass(change) {
-      return change > 0 ? "positive" : "negative";
-    },
   },
   created() {
     this.fetchSteamData();
@@ -154,8 +171,8 @@ export default {
   text-align: center;
   padding: 10px 15px;
   border-bottom: 1px solid #333;
-  position: relative;
-  white-space: nowrap; /* Prevent text wrapping */
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .stats-table th {
@@ -197,12 +214,11 @@ export default {
 .positive-ratio-cell {
   display: flex;
   align-items: center;
-  gap: 10px; /* Space between bar and text */
+  gap: 10px;
 }
 
 .positive-ratio-container {
   position: relative;
-  
   width: 100%;
   height: 10px;
   background-color: #333;
@@ -213,9 +229,9 @@ export default {
 .positive-ratio-bar {
   height: 100%;
   background-color: #4caf50;
-  transition: width 0.3s ease; /* Smooth transition for bar width */
+  transition: width 0.3s ease;
   position: absolute;
-  right: 0; /* Align the bar to the right */
+  right: 0;
 }
 
 .positive-ratio-text {
@@ -225,10 +241,15 @@ export default {
 
 /* Change classes */
 .positive {
-  color: #4caf50; /* Green for positive change */
+  color: #4caf50; /* Green */
 }
 
-.negative-review {
-  color: #f44336; /* Red for all negative reviews */
+.negative {
+  color: #f44336; /* Red */
+}
+
+.neutral {
+  color: #ffeb3b; /* Yellow */
 }
 </style>
+
