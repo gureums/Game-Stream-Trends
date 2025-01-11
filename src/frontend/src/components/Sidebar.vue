@@ -28,7 +28,7 @@
               <div class="icon-container-small">
                 <i class="fas fa-fire"></i>
               </div>
-              <a href="#">Most Played</a>
+              <a href="/steam-mostplayed">Most Played</a>
             </li>
             <li class="submenu-item">
               <div class="icon-container-small">

@@ -1,7 +1,7 @@
 <template>
   <div class="steam-container">
     <header class="steam-header">
-      <h1 class="title">Steam Game Reviews</h1>
+      <h1 class="title">Steam Top Rated Games</h1>
       <p class="subtitle">Explore the latest trends in Game Reviews</p>
     </header>
     <main class="steam-content">
@@ -14,29 +14,40 @@
               <span class="sort-icon" :class="getSortIcon('gameName')"></span>
             </th>
             <th @click="sortTable('positiveRatio')">
-              Positive Review Ratio (%)
+              Positive Review Ratio
               <span class="sort-icon" :class="getSortIcon('positiveRatio')"></span>
             </th>
             <th @click="sortTable('changePositive')">
-              Change in Positive Reviews
+              Positives Reviews
               <span class="sort-icon" :class="getSortIcon('changePositive')"></span>
             </th>
             <th @click="sortTable('changeNegative')">
-              Change in Negative Reviews
+              Negatives Reviews
               <span class="sort-icon" :class="getSortIcon('changeNegative')"></span>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(game, index) in sortedGames" :key="game.rank">
-            <td>{{ index + 1 }}</td> <!-- Rank is fixed -->
+            <td>{{ index + 1 }}</td>
             <td class="game-name">{{ game.gameName }}</td>
-            <td>{{ game.positiveRatio }}%</td>
+            <td class="positive-ratio-cell">
+              <div class="positive-ratio-container">
+                <div
+                  class="positive-ratio-bar"
+                  :style="{ 
+                    width: game.positiveRatio + '%',
+                    backgroundColor: getBarColor(game.positiveRatio),
+                  }"
+                ></div>
+              </div>
+              <span class="positive-ratio-text">{{ game.positiveRatio }}%</span>
+            </td>
             <td :class="getChangeClass(game.changePositive)">
-              {{ game.changePositive }}
+              +{{ game.changePositive }}
             </td>
             <td class="negative-review">
-              {{ game.changeNegative }}
+              +{{ game.changeNegative }}
             </td>
           </tr>
         </tbody>
@@ -49,7 +60,7 @@
 import axios from "axios";
 
 export default {
-  name: "SteamView",
+  name: "SteamTopratedView",
   data() {
     return {
       games: [], // Original games data
@@ -77,6 +88,15 @@ export default {
     },
   },
   methods: {
+    getBarColor(positiveRatio) {
+      if (positiveRatio >= 85) {
+        return "#2196f3"; // Blue
+      } else if (positiveRatio >= 60) {
+        return "#4caf50"; // Green
+      } else {
+        return "#ffeb3b"; // Yellow
+      }
+    },
     async fetchSteamData() {
       try {
         const response = await axios.get("http://localhost:8000/api/steam/recommend");
@@ -85,9 +105,9 @@ export default {
         this.games = rawData.map((game, index) => ({
           rank: index + 1,
           gameName: game[0],
-          positiveRatio: parseFloat(game[1]).toFixed(2), // Positive review ratio
-          changePositive: game[2], // Change in positive reviews
-          changeNegative: game[3], // Change in negative reviews
+          positiveRatio: parseFloat(game[1]).toFixed(2),
+          changePositive: game[2],
+          changeNegative: game[3],
         }));
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -131,7 +151,7 @@ export default {
 
 .stats-table th,
 .stats-table td {
-  text-align: left;
+  text-align: center;
   padding: 10px 15px;
   border-bottom: 1px solid #333;
   position: relative;
@@ -171,6 +191,36 @@ export default {
 .sort-default::after {
   content: "⇅";
   color: #666666;
+}
+
+/* Positive Ratio styles */
+.positive-ratio-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between bar and text */
+}
+
+.positive-ratio-container {
+  position: relative;
+  
+  width: 100%;
+  height: 10px;
+  background-color: #333;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.positive-ratio-bar {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.3s ease; /* Smooth transition for bar width */
+  position: absolute;
+  right: 0; /* Align the bar to the right */
+}
+
+.positive-ratio-text {
+  font-size: 0.9rem;
+  color: #ffffff;
 }
 
 /* Change classes */
