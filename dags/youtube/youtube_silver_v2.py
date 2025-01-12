@@ -17,7 +17,7 @@ dag = DAG(
     'youtube_silver_v2',
     default_args=default_args,
     description='youtube_bronze_4hourly DAG가 수집한 Raw JSON 데이터를 Parquet 포맷으로 변환하여 S3 버킷에 저장하고, 변환된 Parquet 파일은 Redshift 테이블로 적재',
-    schedule_interval=None,
+    schedule_interval="0 15,19,23,3,7,11 * * *",
     catchup=False,
     concurrency=4,
     max_active_runs=4,
