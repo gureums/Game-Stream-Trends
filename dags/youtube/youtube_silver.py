@@ -1,6 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
 default_args = {
     'owner': 'kimhee',
@@ -23,6 +24,16 @@ dag = DAG(
     tags=['youtube', 'silver'],
 )
 
+wait_for_bronze_4hourly = ExternalTaskSensor(
+    task_id='wait_for_bronze_4hourly',
+    external_dag_id='youtube_bronze_4hourly',
+    external_task_id=None,
+    mode='reschedule',
+    timeout=1800,
+    poke_interval=300,
+    dag=dag,
+)
+
 first_glue_job = GlueJobOperator(
     task_id="run_youtube_glue_job",
     job_name="gureum-youtube-videos",
@@ -31,3 +42,5 @@ first_glue_job = GlueJobOperator(
     wait_for_completion=True,
     dag=dag,
 )
+
+wait_for_bronze_4hourly >> first_glue_job
