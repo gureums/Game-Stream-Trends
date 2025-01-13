@@ -9,6 +9,7 @@
         <thead>
           <tr>
             <th>Rank</th>
+            <th> </th>
             <th @click="sortTable('gameName')">
               Game Name
               <span class="sort-icon" :class="getSortIcon('gameName')"></span>
@@ -21,43 +22,50 @@
               Positives
               <span class="sort-icon" :class="getSortIcon('positive')"></span>
             </th>
-            <th @click="sortTable('changePositive')">
-              Positives Changes
-              <span class="sort-icon" :class="getSortIcon('changePositive')"></span>
-            </th>
             <th @click="sortTable('negative')">
               Negatives
               <span class="sort-icon" :class="getSortIcon('negative')"></span>
-            </th>
-            <th @click="sortTable('changeNegative')">
-              Negatives Changes
-              <span class="sort-icon" :class="getSortIcon('changeNegative')"></span>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(game, index) in sortedGames" :key="game.rank">
             <td>{{ index + 1 }}</td>
+            <td>
+              <a
+                :href="'https://store.steampowered.com/app/' + game.gameId"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img :src="game.imageLink" class="preview-image" alt="Game Preview" />
+              </a>
+            </td>
             <td class="game-name">{{ game.gameName }}</td>
             <td class="positive-ratio-cell">
-              <div class="positive-ratio-container">
-                <div
-                  class="positive-ratio-bar"
-                  :style="{ 
-                    width: game.positiveRatio + '%',
-                    backgroundColor: getBarColor(game.positiveRatio),
-                  }"
-                ></div>
+              <div class="positive-ratio-wrapper">
+                <div class="positive-ratio-container">
+                  <div
+                    class="positive-ratio-bar"
+                    :style="{ 
+                      width: game.positiveRatio + '%',
+                      backgroundColor: getBarColor(game.positiveRatio),
+                    }"
+                  ></div>
+                </div>
+                <span class="positive-ratio-text">{{ game.positiveRatio }}%</span>
               </div>
-              <span class="positive-ratio-text">{{ game.positiveRatio }}%</span>
             </td>
-            <td class="positive">{{ formatNumber(game.positive) }}</td>
-            <td :class="getChangeClassForPositive(game.changePositive)">
-              {{ game.changePositive > 0 ? '+' : '' }}{{ game.changePositive }}
+            <td class="positive">
+              {{ formatNumber(game.positive) }}
+              <span class="getChangeClassForPositive(game.changePositive)">
+                ({{ game.changePositive > 0 ? '+' : '' }}{{ game.changePositive }})
+              </span>
             </td>
-            <td class="negative">{{ formatNumber(game.negative) }}</td>
-            <td :class="getChangeClassForNegative(game.changeNegative)">
-              {{ game.changeNegative > 0 ? '+' : '' }}{{ game.changeNegative }}
+            <td class="negative">
+              {{ formatNumber(game.negative) }}
+              <span :class="getChangeClassForNegative(game.changeNegative)">
+                ({{ game.changeNegative > 0 ? '+' : '' }}{{ game.changeNegative }})
+              </span>
             </td>
           </tr>
         </tbody>
@@ -132,15 +140,24 @@ export default {
         const response = await axios.get("http://localhost:8000/api/steam/recommend");
         const rawData = response.data.result;
 
-        this.games = rawData.map((game, index) => ({
-          rank: index + 1,
-          gameName: game[0],
-          positiveRatio: parseFloat(game[1]).toFixed(2),
-          changePositive: game[2],
-          changeNegative: game[3],
-          positive: game[4],
-          negative: game[5],
-        }));
+        this.games = rawData.map((game, index) => {
+          const imageLink = game[1];
+          const gameIdMatch = imageLink.match(/apps\/(\d+)/);
+          const gameId = gameIdMatch ? gameIdMatch[1] : null;
+
+          return {
+            rank: index + 1,
+            gameName: game[0],
+            imageLink: imageLink,
+            gameId: gameId, // 추출한 gameId 추가
+            positiveRatio: parseFloat(game[2]).toFixed(2),
+            changePositive: game[3],
+            changeNegative: game[4],
+            positive: game[5],
+            negative: game[6],
+          };
+        });
+
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
@@ -225,33 +242,52 @@ export default {
   color: #666666;
 }
 
+.preview-image {
+  width: 200px; /* 원하는 너비로 설정 */
+  height: auto;
+  border-radius: 5px; /* 둥근 모서리 */
+  display: block;
+  margin: 0 auto;
+}
+
 /* Positive Ratio styles */
 .positive-ratio-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  vertical-align: middle; /* 테이블 셀 기본 세로 정렬 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  padding: 10px 15px; /* 셀 내부 여백 */
+}
+
+.positive-ratio-wrapper {
+  display: inline-block; /* 블록으로 콘텐츠 정렬 */
+  text-align: center;
+  width: 100%; /* 너비를 셀에 맞춤 */
 }
 
 .positive-ratio-container {
   position: relative;
-  width: 100%;
+  width: 80%; /* 바의 너비 조정 */
   height: 10px;
   background-color: #333;
   border-radius: 5px;
+  margin: 5px auto; /* 상하 여백 추가 */
   overflow: hidden;
 }
 
 .positive-ratio-bar {
+  position: absolute;
   height: 100%;
   background-color: #4caf50;
   transition: width 0.3s ease;
-  position: absolute;
   right: 0;
 }
 
 .positive-ratio-text {
-  font-size: 0.9rem;
+  text-align: right; /* 텍스트를 오른쪽 정렬 */
+  margin-right: 15px;
+  font-size: 1.1rem;
   color: #ffffff;
+  display: block;
+  margin-top: 10px; /* 텍스트와 바 사이 간격 */
 }
 
 /* Change classes */

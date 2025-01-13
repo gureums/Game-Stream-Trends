@@ -64,12 +64,6 @@
               </div>
               <a href="/twitch-gamesummary">Game Summary</a>
             </li>
-            <li class="submenu-item">
-              <div class="icon-container-small">
-                <i class="fas fa-fire"></i>
-              </div>
-              <a href="#">Most watched</a>
-            </li>
           </ul>
         </ul>
       </nav>
