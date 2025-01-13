@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.apis import router as api_router
 
-app = FastAPI()
+app = FastAPI(docs_url='/api/docs')
 
 app.add_middleware(
     CORSMiddleware,
