@@ -14,7 +14,7 @@ async def get_test():
 
 @router.get('/api/steam/overview')
 async def get_steam_summary():
-    query = 'SELECT * FROM gold.steam_overview'
+    query = 'SELECT * FROM gold.steam_overview ORDER BY steam_player_count DESC LIMIT 10'
     result = db.execute_query(query)
     return {'result': result}
 
@@ -35,7 +35,7 @@ async def get_steam_recommend():
 
 @router.get('/api/youtube/overview')
 async def get_youtube_overview():
-    query = 'SELECT * FROM gold.youtube_overview'
+    query = 'SELECT * FROM gold.youtube_overview ORDER BY current_view_count DESC LIMIT 10'
     result = db.execute_query(query)
     return {'result': result}
 
@@ -56,7 +56,7 @@ async def get_youtube_view():
 
 @router.get('/api/twitch/overview')
 async def get_twitch_overview():
-    query = 'SELECT * FROM gold.twtich_overview'
+    query = 'SELECT * FROM gold.twitch_overview ORDER BY twitch_viewer_count DESC LIMIT 10'
     result = db.execute_query(query)
     return {'result': result}
 
