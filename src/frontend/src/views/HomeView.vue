@@ -43,7 +43,7 @@ export default {
     async fetchData() {
       try {
         // Steam 데이터 요청
-        const steamResponse = await axios.get("http://localhost:8000/api/steam/overview");
+        const steamResponse = await axios.get("http://43.202.154.13:8000/api/steam/overview");
         this.steamGames = steamResponse.data.map((game, index) => ({
           id: index + 1,
           title: game[0],
@@ -53,7 +53,7 @@ export default {
         }));
 
         // YouTube 데이터 요청
-        const youtubeResponse = await axios.get("http://localhost:8000/api/youtube/overview");
+        const youtubeResponse = await axios.get("http://43.202.154.13:8000/api/youtube/overview");
         this.youtubeGames = youtubeResponse.data.map((game, index) => ({
           id: index + 1,
           title: game.title,
@@ -64,7 +64,7 @@ export default {
         }));
 
         // Twitch 데이터 요청
-        const twitchResponse = await axios.get("http://localhost:8000/api/twitch/overview");
+        const twitchResponse = await axios.get("http://43.202.154.13:8000/api/twitch/overview");
         this.twitchGames = twitchResponse.data.map((game, index) => ({
           id: index + 1,
           title: game.title,

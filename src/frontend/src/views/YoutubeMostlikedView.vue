@@ -104,7 +104,7 @@ export default {
   methods: {
     async fetchData() {
       try {
-        const response = await axios.get("http://localhost:8000/api/youtube/like");
+        const response = await axios.get("http://43.202.154.13:8000/api/youtube/like");
         const rawData = response.data.result;
 
         this.games = rawData.map((game, index) => ({
