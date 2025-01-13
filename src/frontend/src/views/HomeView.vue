@@ -2,80 +2,143 @@
   <div class="home-container">
     <header class="home-header">
       <h1 class="title">Game & Stream Stats Overview</h1>
-      <p class="subtitle">Check out the most played & watched games on various platforms!</p>
+      <p class="subtitle">Check out the most popular games on various platforms!</p>
     </header>
     <main class="home-content">
-      <div class="summary-cards">
-        <SummaryCard
-          title="Most Played Games on Steam"
-          :games="steamGames"
-        />
-        <SummaryCard
-          title="Most Watched Games on YouTube"
-          :games="youtubeGames"
-        />
-        <SummaryCard
-          title="Most Watched Games on Twitch"
-          :games="twitchGames"
-        />
+      <div class="stats-tables">
+        <!-- Steam Games -->
+        <div class="stats-card">
+          <h3 class="stats-title">Steam</h3>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Game Name</th>
+                <th>Total Hours</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(game, index) in steamGames" :key="index">
+                <td>{{ index + 1 }}</td>
+                <td class="game-name">{{ truncateText(game.name) }}</td>
+                <td>{{ formatNumber(game.absolute) }}</td>
+                
+                <td :class="getChangeClass(game.change)">
+                  {{ game.change > 0 ? '+' : '' }}{{ formatNumber(game.change) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- YouTube Games -->
+        <div class="stats-card">
+          <h3 class="stats-title">Trending YouTube Games</h3>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Game Name</th>
+                <th>Total Hours</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(game, index) in youtubeGames" :key="index">
+                <td>{{ index + 1 }}</td>
+                <td class="game-name">{{ truncateText(game.name) }}</td>
+                <td>{{ formatNumber(game.absolute) }}</td>
+                <td :class="getChangeClass(game.change)">
+                  {{ game.change > 0 ? '+' : '' }}{{ formatNumber(game.change) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Twitch Games -->
+        <div class="stats-card">
+          <h3 class="stats-title">Trending Twitch Games</h3>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Game Name</th>
+                <th>Total Hours</th>
+                <th>Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(game, index) in twitchGames" :key="index">
+                <td>{{ index + 1 }}</td>
+                <td class="game-name">{{ truncateText(game.name) }}</td>
+                <td>{{ formatNumber(game.absolute) }}</td>
+                <td :class="getChangeClass(game.change)">
+                  {{ game.change > 0 ? '+' : '' }}{{ formatNumber(game.change) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   </div>
 </template>
 
 <script>
-import SummaryCard from "@/components/SummaryCard.vue";
 import axios from "axios";
 
 export default {
   name: "HomeView",
-  components: {
-    SummaryCard,
-  },
   data() {
     return {
-      steamGames: [], // Steam 게임 데이터
-      youtubeGames: [], // YouTube 게임 데이터
-      twitchGames: [], // Twitch 게임 데이터
+      steamGames: [],
+      youtubeGames: [],
+      twitchGames: [],
     };
   },
   methods: {
     async fetchData() {
       try {
-        // Steam 데이터 요청
         const steamResponse = await axios.get("http://43.202.154.13:8000/api/steam/overview");
-        this.steamGames = steamResponse.data.map((game, index) => ({
-          id: index + 1,
-          title: game[0],
-          //image: game,
-          hoursWatched: game[1].toLocaleString(),
-          growth: game[2],
+        this.steamGames = steamResponse.data.result.map((game) => ({
+          name: game[0],
+          absolute: game[1],
+          change: game[2],
         }));
 
-        // YouTube 데이터 요청
+
         const youtubeResponse = await axios.get("http://43.202.154.13:8000/api/youtube/overview");
-        this.youtubeGames = youtubeResponse.data.map((game, index) => ({
-          id: index + 1,
-          title: game.title,
-          image: game.image,
-          hoursWatched: game.hoursWatched.toLocaleString(),
-          growth: game.growth,
-          extraHours: `+${game.extraHours.toLocaleString()}`,
+        this.youtubeGames = youtubeResponse.data.result.map((game) => ({
+          name: game[0],
+          absolute: game[2],
+          change: game[3],
         }));
 
-        // Twitch 데이터 요청
         const twitchResponse = await axios.get("http://43.202.154.13:8000/api/twitch/overview");
-        this.twitchGames = twitchResponse.data.map((game, index) => ({
-          id: index + 1,
-          title: game.title,
-          image: game.image,
-          hoursWatched: game.hoursWatched.toLocaleString(),
-          growth: game.growth,
-          extraHours: `+${game.extraHours.toLocaleString()}`,
+        this.twitchGames = twitchResponse.data.result.map((game) => ({
+          name: game[0],
+          absolute: game[1],
+          change: game[2],
         }));
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
+    },
+    getChangeClass(change) {
+      if (change > 0) {
+        return "positive-change"; // 초록색
+      } else if (change < 0) {
+        return "negative-change"; // 빨간색
+      }
+      return ""; // 기본값 (색상 없음)
+    },
+    truncateText(text) {
+      return text.length > 10 ? text.slice(0, 10) + "..." : text;
+    },
+    formatNumber(num) {
+      return num.toLocaleString();
     },
   },
   created() {
@@ -103,17 +166,66 @@ export default {
 
 .subtitle {
   font-size: 1rem;
+  color: #cccccc;
 }
 
-/* Summary Cards Container */
-.summary-cards {
+/* Stats Tables Container */
+.stats-tables {
   display: flex;
+  justify-content: space-between; /* Spread tables horizontally */
   gap: 20px;
 }
 
-.summary-card {
-  flex: 1;
-  max-width: 33%;
+.stats-card {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  width: 32%; /* Three tables evenly distributed */
+}
+
+.stats-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.stats-table th,
+.stats-table td {
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  white-space: nowrap;
+  color: #ffffff;
+}
+
+.stats-table td.positive-change {
+  color: #4caf50; /* 초록색 */
+  font-weight: bold;
+}
+
+.stats-table td.negative-change {
+  color: #f44336; /* 빨간색 */
+  font-weight: bold;
+}
+
+
+.stats-table th {
+  background-color: #333;
+  cursor: pointer;
+}
+
+.stats-table tbody tr:hover {
+  background-color: #2a2a2a;
+}
+
+.game-name {
+  font-weight: bold;
+  color: #4caf50;
 }
 </style>
-  

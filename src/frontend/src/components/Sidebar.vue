@@ -2,6 +2,7 @@
     <aside class="sidebar">
       <div class="top-section">
         <h2 class="sidebar-title">Team Gureum</h2>
+        <h2 class="sidebar-subtitle">Data Updated At: {{ formattedDate }}</h2>
       </div>
       <nav class="menu">
         <ul>
@@ -73,6 +74,22 @@
   <script>
   export default {
     name: 'AppSidebar',
+
+    data() {
+      return {
+        currentDate: new Date(),
+      };
+    },
+    computed: {
+      formattedDate() {
+        const options = {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        };
+        return this.currentDate.toLocaleString("en-US", options);
+      },
+    },
   };
   </script>
   
@@ -90,6 +107,12 @@
   
   .sidebar-title {
     font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  .sidebar-subtitle {
+    font-size: 0.7rem;
     font-weight: bold;
     margin-bottom: 20px;
   }
