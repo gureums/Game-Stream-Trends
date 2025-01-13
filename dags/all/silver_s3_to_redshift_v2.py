@@ -26,7 +26,7 @@ with DAG(
         {'task_id': 'wait_for_steam_silver_daily', 'external_dag_id': 'steam_silver_daily'},
         {'task_id': 'wait_for_steam_silver_4hourly', 'external_dag_id': 'steam_silver_4hourly'},
         {'task_id': 'wait_for_twitch_silver', 'external_dag_id': 'twitch_silver'},
-        {'task_id': 'wait_for_youtube_silver', 'external_dag_id': 'youtube_silver'},
+        {'task_id': 'wait_for_youtube_silver', 'external_dag_id': 'youtube_silver_v2'},
     ]
 
     sensors = []
